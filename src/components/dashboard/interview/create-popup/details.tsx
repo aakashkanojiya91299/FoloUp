@@ -9,10 +9,13 @@ import { CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import FileUpload from "../fileUpload";
 import Modal from "@/components/dashboard/Modal";
 import InterviewerDetailsModal from "@/components/dashboard/interviewer/interviewerDetailsModal";
 import { Interviewer } from "@/types/interviewer";
+import { useClerk, useOrganization } from "@clerk/nextjs";
 
 interface Props {
   open: boolean;
@@ -36,9 +39,14 @@ function DetailsPopup({
   setFileName,
 }: Props) {
   const { interviewers } = useInterviewers();
+  const { user } = useClerk();
+  const { organization } = useOrganization();
   const [isClicked, setIsClicked] = useState(false);
   const [openInterviewerDetails, setOpenInterviewerDetails] = useState(false);
   const [interviewerDetails, setInterviewerDetails] = useState<Interviewer>();
+  const [selectedAIProvider, setSelectedAIProvider] = useState<"openai" | "gemini">("openai");
+  const [isSwitchingProvider, setIsSwitchingProvider] = useState(false);
+  const [lastUsedProvider, setLastUsedProvider] = useState<"openai" | "gemini" | null>(null);
 
   const [name, setName] = useState(interviewData.name);
   const [selectedInterviewer, setSelectedInterviewer] = useState(
@@ -70,45 +78,124 @@ function DetailsPopup({
     }
   };
 
+  const switchAIProvider = async (provider: "openai" | "gemini") => {
+    if (provider === selectedAIProvider) return;
+    
+    setIsSwitchingProvider(true);
+    try {
+      console.log(`Switching from ${selectedAIProvider} to ${provider}`);
+      await axios.post("/api/ai-provider", {
+        provider,
+        organizationId: organization?.id,
+        userId: user?.id,
+      });
+      setSelectedAIProvider(provider);
+      console.log(`Successfully switched to ${provider}`);
+      toast.success(`Switched to ${provider} provider successfully!`);
+    } catch (error) {
+      console.error("Failed to switch AI provider:", error);
+      toast.error(`Failed to switch to ${provider} provider. Please try again.`);
+    } finally {
+      setIsSwitchingProvider(false);
+    }
+  };
+
+  const getCurrentProvider = async () => {
+    try {
+      const response = await axios.get("/api/ai-provider", {
+        params: {
+          organizationId: organization?.id,
+          userId: user?.id,
+        },
+      });
+      const provider = response.data.provider;
+      console.log(`Current provider from API: ${provider}`);
+      setSelectedAIProvider(provider);
+    } catch (error) {
+      console.error("Failed to get current provider:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCurrentProvider();
+  }, []);
+
   const onGenrateQuestions = async () => {
     setLoading(true);
+    setIsClicked(true);
 
     const data = {
-      name: name.trim(),
-      objective: objective.trim(),
-      number: numQuestions,
+      jobTitle: name.trim(),
+      jobDescription: objective.trim(),
+      questionCount: numQuestions,
       context: uploadedDocumentContext,
+      provider: selectedAIProvider,
+      organizationId: organization?.id,
+      userId: user?.id,
     };
 
-    const generatedQuestions = (await axios.post(
-      "/api/generate-interview-questions",
-      data,
-    )) as any;
+    let providersToTry = selectedAIProvider === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+    let success = false;
+    let lastError = null;
 
-    const generatedQuestionsResponse = JSON.parse(
-      generatedQuestions?.data?.response,
-    );
+    for (const provider of providersToTry) {
+      try {
+        const res = await axios.post("/api/generate-interview-questions", {
+          ...data,
+          provider,
+        });
 
-    const updatedQuestions = generatedQuestionsResponse.questions.map(
-      (question: Question) => ({
-        id: uuidv4(),
-        question: question.question.trim(),
-        follow_up_count: 1,
-      }),
-    );
+        let generatedQuestionsResponse;
+        if (res?.data?.response) {
+          try {
+            generatedQuestionsResponse = JSON.parse(res.data.response);
+          } catch (parseErr) {
+            throw new Error("Invalid JSON response from AI provider");
+          }
+        } else if (res?.data?.questions) {
+          generatedQuestionsResponse = {
+            questions: res.data.questions,
+            description: res.data.description || "",
+          };
+        } else {
+          throw new Error("No valid response from AI provider");
+        }
 
-    const updatedInterviewData = {
-      ...interviewData,
-      name: name.trim(),
-      objective: objective.trim(),
-      questions: updatedQuestions,
-      interviewer_id: selectedInterviewer,
-      question_count: Number(numQuestions),
-      time_duration: duration,
-      description: generatedQuestionsResponse.description,
-      is_anonymous: isAnonymous,
-    };
-    setInterviewData(updatedInterviewData);
+        const updatedQuestions = generatedQuestionsResponse.questions.map(
+          (question: Question) => ({
+            id: uuidv4(),
+            question: question.question.trim(),
+            follow_up_count: 1,
+          })
+        );
+
+        const updatedInterviewData = {
+          ...interviewData,
+          name: name.trim(),
+          objective: objective.trim(),
+          questions: updatedQuestions,
+          interviewer_id: selectedInterviewer,
+          question_count: Number(numQuestions),
+          time_duration: duration,
+          description: generatedQuestionsResponse.description,
+          is_anonymous: isAnonymous,
+        };
+        setInterviewData(updatedInterviewData);
+        setLastUsedProvider(provider as "openai" | "gemini");
+        toast.success(`Questions generated successfully using ${provider.toUpperCase()}!`);
+        success = true;
+        break;
+      } catch (error) {
+        lastError = error;
+        console.error(`Error with provider ${provider}:`, error);
+      }
+    }
+
+    if (!success) {
+      toast.error("Failed to generate questions with all AI providers. Please try again later.");
+      setLoading(false);
+      setIsClicked(false);
+    }
   };
 
   const onManual = () => {
@@ -303,6 +390,62 @@ function DetailsPopup({
               />
             </div>
           </div>
+          
+          {/* AI Provider Selection */}
+          <div className="mt-4 w-full">
+            <h3 className="text-sm font-medium mb-2">AI Provider for Question Generation:</h3>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedAIProvider === "openai" ? "default" : "outline"}
+                size="sm"
+                onClick={() => switchAIProvider("openai")}
+                disabled={isSwitchingProvider}
+                className="flex-1"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  OpenAI GPT-4
+                  {selectedAIProvider === "openai" && (
+                    <Badge variant="secondary" className="ml-1">Active</Badge>
+                  )}
+                  {isSwitchingProvider && selectedAIProvider !== "openai" && (
+                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
+                  )}
+                </div>
+              </Button>
+              <Button
+                variant={selectedAIProvider === "gemini" ? "default" : "outline"}
+                size="sm"
+                onClick={() => switchAIProvider("gemini")}
+                disabled={isSwitchingProvider}
+                className="flex-1"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  Google Gemini
+                  {selectedAIProvider === "gemini" && (
+                    <Badge variant="secondary" className="ml-1">Active</Badge>
+                  )}
+                  {isSwitchingProvider && selectedAIProvider !== "gemini" && (
+                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
+                  )}
+                </div>
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {selectedAIProvider === "openai" 
+                ? "High-quality responses with GPT-4 (higher cost)" 
+                : "Cost-effective responses with Gemini (lower cost)"
+              }
+              {isSwitchingProvider && " • Switching..."}
+              {lastUsedProvider && (
+                <span className="ml-2 text-green-600">
+                  • Last used: {lastUsedProvider.toUpperCase()}
+                </span>
+              )}
+            </p>
+          </div>
+          
           <div className="flex flex-row w-full justify-center items-center space-x-24 mt-5">
             <Button
               disabled={

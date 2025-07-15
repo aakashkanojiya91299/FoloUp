@@ -1,6 +1,5 @@
 "use server";
 
-import { OpenAI } from "openai";
 import { ResponseService } from "@/services/responses.service";
 import { InterviewService } from "@/services/interviews.service";
 import { Question } from "@/types/interview";
@@ -9,6 +8,7 @@ import {
   getInterviewAnalyticsPrompt,
   SYSTEM_PROMPT,
 } from "@/lib/prompts/analytics";
+import { aiService } from "@/services/ai.service";
 
 export const generateInterviewAnalytics = async (payload: {
   callId: string;
@@ -31,18 +31,12 @@ export const generateInterviewAnalytics = async (payload: {
       .map((q: Question, index: number) => `${index + 1}. ${q.question}`)
       .join("\n");
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      maxRetries: 5,
-      dangerouslyAllowBrowser: true,
-    });
-
     const prompt = getInterviewAnalyticsPrompt(
       interviewTranscript,
       mainInterviewQuestions,
     );
 
-    const baseCompletion = await openai.chat.completions.create({
+    const aiResponse = await aiService.createCompletion({
       model: "gpt-4o",
       messages: [
         {
@@ -54,11 +48,10 @@ export const generateInterviewAnalytics = async (payload: {
           content: prompt,
         },
       ],
-      response_format: { type: "json_object" },
+      responseFormat: { type: "json_object" },
     });
 
-    const basePromptOutput = baseCompletion.choices[0] || {};
-    const content = basePromptOutput.message?.content || "";
+    const content = aiResponse.content;
     const analyticsResponse = JSON.parse(content);
 
     analyticsResponse.mainInterviewQuestions = questions.map(
@@ -66,8 +59,45 @@ export const generateInterviewAnalytics = async (payload: {
     );
 
     return { analytics: analyticsResponse, status: 200 };
-  } catch (error) {
-    console.error("Error in OpenAI request:", error);
+  } catch (error: any) {
+    console.error("Error in AI request:", error);
+    
+    // Handle specific AI API errors
+    if (error?.status === 429) {
+      console.error("AI API quota exceeded");
+      return { 
+        error: "API quota exceeded. Please check your AI provider billing and try again later.",
+        details: "You have exceeded your current AI API quota. Please check your plan and billing details.",
+        status: 429 
+      };
+    }
+    
+    if (error?.status === 401) {
+      console.error("AI API authentication failed");
+      return { 
+        error: "API authentication failed",
+        details: "Invalid or missing API key. Please check your configuration.",
+        status: 401 
+      };
+    }
+    
+    if (error?.status === 400) {
+      console.error("AI API bad request");
+      return { 
+        error: "Invalid request to AI service",
+        details: error.message || "The request to AI service was malformed.",
+        status: 400 
+      };
+    }
+    
+    if (error?.status === 503 || error?.status === 502) {
+      console.error("AI API service unavailable");
+      return { 
+        error: "AI service temporarily unavailable",
+        details: "AI services are currently experiencing issues. Please try again later.",
+        status: 503 
+      };
+    }
 
     return { error: "internal server error", status: 500 };
   }

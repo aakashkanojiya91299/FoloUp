@@ -1,4 +1,3 @@
-import { OpenAI } from "openai";
 import { NextResponse } from "next/server";
 import { ResponseService } from "@/services/responses.service";
 import { InterviewService } from "@/services/interviews.service";
@@ -7,6 +6,7 @@ import {
   createUserPrompt,
 } from "@/lib/prompts/generate-insights";
 import { logger } from "@/lib/logger";
+import { aiService } from "@/services/ai.service";
 
 export async function POST(req: Request, res: Response) {
   logger.info("generate-insights request received");
@@ -22,12 +22,6 @@ export async function POST(req: Request, res: Response) {
     });
   }
 
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    maxRetries: 5,
-    dangerouslyAllowBrowser: true,
-  });
-
   try {
     const prompt = createUserPrompt(
       callSummaries,
@@ -36,7 +30,7 @@ export async function POST(req: Request, res: Response) {
       interview.description,
     );
 
-    const baseCompletion = await openai.chat.completions.create({
+    const response = await aiService.createCompletion({
       model: "gpt-4o",
       messages: [
         {
@@ -48,11 +42,10 @@ export async function POST(req: Request, res: Response) {
           content: prompt,
         },
       ],
-      response_format: { type: "json_object" },
+      responseFormat: { type: "json_object" },
     });
 
-    const basePromptOutput = baseCompletion.choices[0] || {};
-    const content = basePromptOutput.message?.content || "";
+    const content = response.content;
     const insightsResponse = JSON.parse(content);
 
     await InterviewService.updateInterview(
@@ -68,11 +61,60 @@ export async function POST(req: Request, res: Response) {
       },
       { status: 200 },
     );
-  } catch (error) {
-    logger.error("Error generating insights");
+  } catch (error: any) {
+    logger.error(error);
+    
+    // Handle specific AI API errors
+    if (error?.status === 429) {
+      logger.error("AI API quota exceeded");
+      return NextResponse.json(
+        { 
+          error: "API quota exceeded. Please check your AI provider billing and try again later.",
+          details: "You have exceeded your current AI API quota. Please check your plan and billing details."
+        },
+        { status: 429 },
+      );
+    }
+    
+    if (error?.status === 401) {
+      logger.error("AI API authentication failed");
+      return NextResponse.json(
+        { 
+          error: "API authentication failed",
+          details: "Invalid or missing API key. Please check your configuration."
+        },
+        { status: 401 },
+      );
+    }
+    
+    if (error?.status === 400) {
+      logger.error("AI API bad request");
+      return NextResponse.json(
+        { 
+          error: "Invalid request to AI service",
+          details: error.message || "The request to AI service was malformed."
+        },
+        { status: 400 },
+      );
+    }
+    
+    if (error?.status === 503 || error?.status === 502) {
+      logger.error("AI API service unavailable");
+      return NextResponse.json(
+        { 
+          error: "AI service temporarily unavailable",
+          details: "AI services are currently experiencing issues. Please try again later."
+        },
+        { status: 503 },
+      );
+    }
 
+    logger.error("Error generating insights");
     return NextResponse.json(
-      { error: "internal server error" },
+      { 
+        error: "Internal server error",
+        details: "An unexpected error occurred while generating insights."
+      },
       { status: 500 },
     );
   }
