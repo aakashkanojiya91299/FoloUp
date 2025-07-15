@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error in GET /api/ai-provider:", error);
-    return NextResponse.json(
+    
+return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
     );
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error in POST /api/ai-provider:", error);
-    return NextResponse.json(
+    
+return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
     );
@@ -108,7 +110,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error in DELETE /api/ai-provider:", error);
-    return NextResponse.json(
+    
+return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
     );

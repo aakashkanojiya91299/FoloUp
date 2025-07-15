@@ -83,7 +83,7 @@ function DetailsPopup({
   };
 
   const switchAIProvider = async (provider: "openai" | "gemini") => {
-    if (provider === selectedAIProvider) return;
+    if (provider === selectedAIProvider) {return;}
 
     setIsSwitchingProvider(true);
     try {
@@ -239,6 +239,10 @@ function DetailsPopup({
       setIsClicked(false);
     }
   }, [open]);
+
+  useEffect(() => {
+    getCurrentProvider();
+  }, [getCurrentProvider]);
 
   return (
     <>
@@ -415,12 +419,12 @@ function DetailsPopup({
                   selectedAIProvider === "openai" ? "default" : "outline"
                 }
                 size="sm"
-                onClick={() => switchAIProvider("openai")}
                 disabled={isSwitchingProvider}
                 className="flex-1"
+                onClick={() => switchAIProvider("openai")}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
                   OpenAI GPT-4
                   {selectedAIProvider === "openai" && (
                     <Badge variant="secondary" className="ml-1">
@@ -428,7 +432,7 @@ function DetailsPopup({
                     </Badge>
                   )}
                   {isSwitchingProvider && selectedAIProvider !== "openai" && (
-                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
+                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1" />
                   )}
                 </div>
               </Button>
@@ -437,12 +441,12 @@ function DetailsPopup({
                   selectedAIProvider === "gemini" ? "default" : "outline"
                 }
                 size="sm"
-                onClick={() => switchAIProvider("gemini")}
                 disabled={isSwitchingProvider}
                 className="flex-1"
+                onClick={() => switchAIProvider("gemini")}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
                   Google Gemini
                   {selectedAIProvider === "gemini" && (
                     <Badge variant="secondary" className="ml-1">
@@ -450,7 +454,7 @@ function DetailsPopup({
                     </Badge>
                   )}
                   {isSwitchingProvider && selectedAIProvider !== "gemini" && (
-                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
+                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1" />
                   )}
                 </div>
               </Button>

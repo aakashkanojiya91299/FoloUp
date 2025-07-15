@@ -49,7 +49,8 @@ export async function POST(req: Request) {
     // Handle specific AI API errors
     if (error?.status === 429) {
       logger.error("AI API quota exceeded");
-      return NextResponse.json(
+      
+return NextResponse.json(
         {
           error:
             "API quota exceeded. Please check your AI provider billing and try again later.",
@@ -62,7 +63,8 @@ export async function POST(req: Request) {
 
     if (error?.status === 401) {
       logger.error("AI API authentication failed");
-      return NextResponse.json(
+      
+return NextResponse.json(
         {
           error: "API authentication failed",
           details:
@@ -74,7 +76,8 @@ export async function POST(req: Request) {
 
     if (error?.status === 400) {
       logger.error("AI API bad request");
-      return NextResponse.json(
+      
+return NextResponse.json(
         {
           error: "Invalid request to AI service",
           details: error.message || "The request to AI service was malformed.",
@@ -85,7 +88,8 @@ export async function POST(req: Request) {
 
     if (error?.status === 503 || error?.status === 502) {
       logger.error("AI API service unavailable");
-      return NextResponse.json(
+      
+return NextResponse.json(
         {
           error: "AI service temporarily unavailable",
           details:
@@ -96,7 +100,8 @@ export async function POST(req: Request) {
     }
 
     logger.error("Error analyzing communication skills");
-    return NextResponse.json(
+    
+return NextResponse.json(
       {
         error: "Internal server error",
         details:

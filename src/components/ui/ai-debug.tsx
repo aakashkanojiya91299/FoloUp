@@ -110,18 +110,18 @@ export function AIDebug() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
-          <Button onClick={getCurrentProvider} variant="outline">
+          <Button variant="outline" onClick={getCurrentProvider}>
             Get Current Provider
           </Button>
           <Button
-            onClick={() => testProviderSwitch("openai")}
             variant="outline"
+            onClick={() => testProviderSwitch("openai")}
           >
             Switch to OpenAI
           </Button>
           <Button
-            onClick={() => testProviderSwitch("gemini")}
             variant="outline"
+            onClick={() => testProviderSwitch("gemini")}
           >
             Switch to Gemini
           </Button>
@@ -131,17 +131,17 @@ export function AIDebug() {
           <label className="text-sm font-medium">Test Data (JSON):</label>
           <Textarea
             value={testData}
-            onChange={(e) => setTestData(e.target.value)}
             placeholder="Enter test data..."
             className="mt-1"
             rows={6}
+            onChange={(e) => setTestData(e.target.value)}
           />
         </div>
 
         <Button
-          onClick={testGenerateQuestions}
           disabled={isLoading}
           className="w-full"
+          onClick={testGenerateQuestions}
         >
           {isLoading ? "Testing..." : "Test Generate Questions"}
         </Button>

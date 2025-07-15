@@ -31,7 +31,8 @@ export async function getAIProviderPreference(
   if (error) {
     console.log("Error fetching AI provider preference:", error);
     console.error("Error fetching AI provider preference:", error);
-    return null;
+    
+return null;
   }
 
   return data;
@@ -75,7 +76,8 @@ export async function setAIProviderPreference(
 
   if (insertError) {
     console.error("Error creating AI provider preference:", insertError);
-    return null;
+    
+return null;
   }
 
   return insertData;
@@ -97,7 +99,8 @@ export async function getOrganizationAIProviderPreference(
 
   if (error) {
     console.error("Error fetching organization AI provider preference:", error);
-    return null;
+    
+return null;
   }
 
   return data;
@@ -117,7 +120,8 @@ export async function deleteAIProviderPreference(
 
   if (error) {
     console.error("Error deleting AI provider preference:", error);
-    return false;
+    
+return false;
   }
 
   return true;

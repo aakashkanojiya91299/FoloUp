@@ -98,7 +98,8 @@ export class AIService {
         dangerouslyAllowBrowser: true,
       });
     }
-    return this.openai;
+    
+return this.openai;
   }
 
   private initializeGemini() {
@@ -109,7 +110,8 @@ export class AIService {
       }
       this.gemini = new GoogleGenerativeAI(apiKey);
     }
-    return this.gemini;
+    
+return this.gemini;
   }
 
   async createCompletion(
@@ -263,7 +265,8 @@ export class AIService {
     console.log(
       `AI Service getCurrentProvider called, returning: ${globalCurrentProvider}`,
     );
-    return globalCurrentProvider;
+    
+return globalCurrentProvider;
   }
 
   // Helper method to set the default provider

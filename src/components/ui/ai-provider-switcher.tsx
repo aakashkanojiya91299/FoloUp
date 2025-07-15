@@ -36,7 +36,7 @@ export function AIProviderSwitcher() {
   };
 
   const switchProvider = async (provider: AIProvider) => {
-    if (provider === currentProvider) return;
+    if (provider === currentProvider) {return;}
 
     setIsLoading(true);
     try {
@@ -139,8 +139,8 @@ export function AIProviderSwitcher() {
           <div className="text-sm text-gray-600">
             <p className="font-medium mb-1">Features:</p>
             <ul className="list-disc list-inside space-y-1">
-              {currentInfo.features.map((feature, index) => (
-                <li key={index}>{feature}</li>
+              {currentInfo.features.map((feature, idx) => (
+                <li key={idx}>{feature}</li>
               ))}
             </ul>
           </div>
