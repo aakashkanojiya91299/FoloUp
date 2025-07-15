@@ -44,9 +44,13 @@ function DetailsPopup({
   const [isClicked, setIsClicked] = useState(false);
   const [openInterviewerDetails, setOpenInterviewerDetails] = useState(false);
   const [interviewerDetails, setInterviewerDetails] = useState<Interviewer>();
-  const [selectedAIProvider, setSelectedAIProvider] = useState<"openai" | "gemini">("openai");
+  const [selectedAIProvider, setSelectedAIProvider] = useState<
+    "openai" | "gemini"
+  >("openai");
   const [isSwitchingProvider, setIsSwitchingProvider] = useState(false);
-  const [lastUsedProvider, setLastUsedProvider] = useState<"openai" | "gemini" | null>(null);
+  const [lastUsedProvider, setLastUsedProvider] = useState<
+    "openai" | "gemini" | null
+  >(null);
 
   const [name, setName] = useState(interviewData.name);
   const [selectedInterviewer, setSelectedInterviewer] = useState(
@@ -80,7 +84,7 @@ function DetailsPopup({
 
   const switchAIProvider = async (provider: "openai" | "gemini") => {
     if (provider === selectedAIProvider) return;
-    
+
     setIsSwitchingProvider(true);
     try {
       console.log(`Switching from ${selectedAIProvider} to ${provider}`);
@@ -94,7 +98,9 @@ function DetailsPopup({
       toast.success(`Switched to ${provider} provider successfully!`);
     } catch (error) {
       console.error("Failed to switch AI provider:", error);
-      toast.error(`Failed to switch to ${provider} provider. Please try again.`);
+      toast.error(
+        `Failed to switch to ${provider} provider. Please try again.`,
+      );
     } finally {
       setIsSwitchingProvider(false);
     }
@@ -134,7 +140,10 @@ function DetailsPopup({
       userId: user?.id,
     };
 
-    let providersToTry = selectedAIProvider === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+    let providersToTry =
+      selectedAIProvider === "openai"
+        ? ["openai", "gemini"]
+        : ["gemini", "openai"];
     let success = false;
     let lastError = null;
 
@@ -166,7 +175,7 @@ function DetailsPopup({
             id: uuidv4(),
             question: question.question.trim(),
             follow_up_count: 1,
-          })
+          }),
         );
 
         const updatedInterviewData = {
@@ -182,7 +191,9 @@ function DetailsPopup({
         };
         setInterviewData(updatedInterviewData);
         setLastUsedProvider(provider as "openai" | "gemini");
-        toast.success(`Questions generated successfully using ${provider.toUpperCase()}!`);
+        toast.success(
+          `Questions generated successfully using ${provider.toUpperCase()}!`,
+        );
         success = true;
         break;
       } catch (error) {
@@ -192,7 +203,9 @@ function DetailsPopup({
     }
 
     if (!success) {
-      toast.error("Failed to generate questions with all AI providers. Please try again later.");
+      toast.error(
+        "Failed to generate questions with all AI providers. Please try again later.",
+      );
       setLoading(false);
       setIsClicked(false);
     }
@@ -390,13 +403,17 @@ function DetailsPopup({
               />
             </div>
           </div>
-          
+
           {/* AI Provider Selection */}
           <div className="mt-4 w-full">
-            <h3 className="text-sm font-medium mb-2">AI Provider for Question Generation:</h3>
+            <h3 className="text-sm font-medium mb-2">
+              AI Provider for Question Generation:
+            </h3>
             <div className="flex gap-2">
               <Button
-                variant={selectedAIProvider === "openai" ? "default" : "outline"}
+                variant={
+                  selectedAIProvider === "openai" ? "default" : "outline"
+                }
                 size="sm"
                 onClick={() => switchAIProvider("openai")}
                 disabled={isSwitchingProvider}
@@ -406,7 +423,9 @@ function DetailsPopup({
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   OpenAI GPT-4
                   {selectedAIProvider === "openai" && (
-                    <Badge variant="secondary" className="ml-1">Active</Badge>
+                    <Badge variant="secondary" className="ml-1">
+                      Active
+                    </Badge>
                   )}
                   {isSwitchingProvider && selectedAIProvider !== "openai" && (
                     <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
@@ -414,7 +433,9 @@ function DetailsPopup({
                 </div>
               </Button>
               <Button
-                variant={selectedAIProvider === "gemini" ? "default" : "outline"}
+                variant={
+                  selectedAIProvider === "gemini" ? "default" : "outline"
+                }
                 size="sm"
                 onClick={() => switchAIProvider("gemini")}
                 disabled={isSwitchingProvider}
@@ -424,7 +445,9 @@ function DetailsPopup({
                   <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                   Google Gemini
                   {selectedAIProvider === "gemini" && (
-                    <Badge variant="secondary" className="ml-1">Active</Badge>
+                    <Badge variant="secondary" className="ml-1">
+                      Active
+                    </Badge>
                   )}
                   {isSwitchingProvider && selectedAIProvider !== "gemini" && (
                     <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin ml-1"></div>
@@ -433,10 +456,9 @@ function DetailsPopup({
               </Button>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {selectedAIProvider === "openai" 
-                ? "High-quality responses with GPT-4 (higher cost)" 
-                : "Cost-effective responses with Gemini (lower cost)"
-              }
+              {selectedAIProvider === "openai"
+                ? "High-quality responses with GPT-4 (higher cost)"
+                : "Cost-effective responses with Gemini (lower cost)"}
               {isSwitchingProvider && " • Switching..."}
               {lastUsedProvider && (
                 <span className="ml-2 text-green-600">
@@ -445,7 +467,7 @@ function DetailsPopup({
               )}
             </p>
           </div>
-          
+
           <div className="flex flex-row w-full justify-center items-center space-x-24 mt-5">
             <Button
               disabled={

@@ -57,39 +57,43 @@ export function isLightColor(color: string) {
 export const handleOpenAIError = (error: any) => {
   if (error?.status === 429) {
     return {
-      error: "API quota exceeded. Please check your OpenAI billing and try again later.",
-      details: "You have exceeded your current OpenAI API quota. Please check your plan and billing details.",
-      status: 429
+      error:
+        "API quota exceeded. Please check your OpenAI billing and try again later.",
+      details:
+        "You have exceeded your current OpenAI API quota. Please check your plan and billing details.",
+      status: 429,
     };
   }
-  
+
   if (error?.status === 401) {
     return {
       error: "API authentication failed",
-      details: "Invalid or missing OpenAI API key. Please check your configuration.",
-      status: 401
+      details:
+        "Invalid or missing OpenAI API key. Please check your configuration.",
+      status: 401,
     };
   }
-  
+
   if (error?.status === 400) {
     return {
       error: "Invalid request to AI service",
       details: error.message || "The request to OpenAI was malformed.",
-      status: 400
+      status: 400,
     };
   }
-  
+
   if (error?.status === 503 || error?.status === 502) {
     return {
       error: "AI service temporarily unavailable",
-      details: "OpenAI services are currently experiencing issues. Please try again later.",
-      status: 503
+      details:
+        "OpenAI services are currently experiencing issues. Please try again later.",
+      status: 503,
     };
   }
 
   return {
     error: "Internal server error",
     details: "An unexpected error occurred.",
-    status: 500
+    status: 500,
   };
 };

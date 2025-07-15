@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -39,7 +45,9 @@ export function AIProviderSwitcher() {
       toast.success(`Switched to ${provider.toUpperCase()}`);
     } catch (error: any) {
       console.error("Failed to switch AI provider:", error);
-      toast.error(error.response?.data?.error || "Failed to switch AI provider");
+      toast.error(
+        error.response?.data?.error || "Failed to switch AI provider",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -52,21 +60,25 @@ export function AIProviderSwitcher() {
           name: "OpenAI",
           description: "GPT-4 and GPT-3.5 models",
           color: "bg-green-500",
-          features: ["High quality responses", "Wide model selection", "JSON output support"]
+          features: [
+            "High quality responses",
+            "Wide model selection",
+            "JSON output support",
+          ],
         };
       case "gemini":
         return {
           name: "Google Gemini",
           description: "Gemini 1.5 Pro and Flash models",
           color: "bg-blue-500",
-          features: ["Cost effective", "Fast responses", "Good for most tasks"]
+          features: ["Cost effective", "Fast responses", "Good for most tasks"],
         };
       default:
         return {
           name: "Unknown",
           description: "",
           color: "bg-gray-500",
-          features: []
+          features: [],
         };
     }
   };
@@ -78,12 +90,15 @@ export function AIProviderSwitcher() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           AI Provider
-          <Badge variant={currentProvider === "openai" ? "default" : "secondary"}>
+          <Badge
+            variant={currentProvider === "openai" ? "default" : "secondary"}
+          >
             {currentProvider.toUpperCase()}
           </Badge>
         </CardTitle>
         <CardDescription>
-          Choose your preferred AI provider for generating interview questions and insights
+          Choose your preferred AI provider for generating interview questions
+          and insights
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -102,14 +117,20 @@ export function AIProviderSwitcher() {
               <div className={`w-3 h-3 rounded-full ${currentInfo.color}`} />
               <div>
                 <p className="font-medium">{currentInfo.name}</p>
-                <p className="text-sm text-gray-500">{currentInfo.description}</p>
+                <p className="text-sm text-gray-500">
+                  {currentInfo.description}
+                </p>
               </div>
             </div>
             <Button
               size="sm"
               variant="outline"
               disabled={isLoading || !isEnabled}
-              onClick={() => switchProvider(currentProvider === "openai" ? "gemini" : "openai")}
+              onClick={() =>
+                switchProvider(
+                  currentProvider === "openai" ? "gemini" : "openai",
+                )
+              }
             >
               {isLoading ? "Switching..." : "Switch"}
             </Button>
@@ -126,10 +147,13 @@ export function AIProviderSwitcher() {
         </div>
 
         <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-          <p><strong>Note:</strong> Switching providers may affect response quality and cost. 
-          Make sure you have valid API keys configured in your environment variables.</p>
+          <p>
+            <strong>Note:</strong> Switching providers may affect response
+            quality and cost. Make sure you have valid API keys configured in
+            your environment variables.
+          </p>
         </div>
       </CardContent>
     </Card>
   );
-} 
+}

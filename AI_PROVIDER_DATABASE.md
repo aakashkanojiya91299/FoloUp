@@ -54,6 +54,7 @@ SELECT * FROM ai_provider_preferences LIMIT 5;
 ## How It Works
 
 ### **Priority Order**
+
 1. **Database Preference**: User's saved preference in the database
 2. **In-Memory Provider**: Current provider in the AI service
 3. **Environment Variable**: `AI_PROVIDER` from `.env.local`
@@ -61,17 +62,20 @@ SELECT * FROM ai_provider_preferences LIMIT 5;
 ### **API Flow**
 
 #### **GET /api/ai-provider**
+
 1. Check if user is authenticated
 2. Look up user's preference in database
 3. Return database preference or fallback to in-memory
 
 #### **POST /api/ai-provider**
+
 1. Validate the provider (openai/gemini)
 2. Update in-memory provider
 3. Save preference to database
 4. Return success response
 
 #### **POST /api/generate-interview-questions**
+
 1. Get current provider from database (if available)
 2. Fallback to in-memory provider
 3. Use the provider for question generation
@@ -80,16 +84,19 @@ SELECT * FROM ai_provider_preferences LIMIT 5;
 ## Benefits
 
 ### **Persistence**
+
 - ✅ Provider preferences survive server restarts
 - ✅ User preferences are maintained across sessions
 - ✅ Organization-wide preferences can be set
 
 ### **Reliability**
+
 - ✅ Fallback mechanisms ensure the system always works
 - ✅ Graceful degradation if database is unavailable
 - ✅ No interruption to user experience
 
 ### **Scalability**
+
 - ✅ Supports multiple users and organizations
 - ✅ Efficient database queries with indexes
 - ✅ Soft deletes for data integrity
@@ -97,44 +104,49 @@ SELECT * FROM ai_provider_preferences LIMIT 5;
 ## Usage Examples
 
 ### **Setting a Preference**
+
 ```typescript
 // This happens automatically when user switches providers
 await AIProviderPreferencesService.setPreference(
-  "org_123", 
-  "user_456", 
-  "gemini"
+  "org_123",
+  "user_456",
+  "gemini",
 );
 ```
 
 ### **Getting a Preference**
+
 ```typescript
 const preference = await AIProviderPreferencesService.getPreference(
-  "org_123", 
-  "user_456"
+  "org_123",
+  "user_456",
 );
 // Returns: { preferred_provider: "gemini", ... }
 ```
 
 ### **Organization Preference**
+
 ```typescript
-const orgPreference = await AIProviderPreferencesService.getOrganizationPreference(
-  "org_123"
-);
+const orgPreference =
+  await AIProviderPreferencesService.getOrganizationPreference("org_123");
 ```
 
 ## Error Handling
 
 ### **Database Unavailable**
+
 - System falls back to in-memory provider
 - User experience is not interrupted
 - Errors are logged for monitoring
 
 ### **Invalid Provider**
+
 - API returns 400 error
 - Clear error message to user
 - No database changes made
 
 ### **Authentication Issues**
+
 - API returns 401 error
 - User must be logged in to save preferences
 - Anonymous users can still use the system
@@ -142,22 +154,24 @@ const orgPreference = await AIProviderPreferencesService.getOrganizationPreferen
 ## Monitoring
 
 ### **Database Queries**
+
 Monitor these queries for performance:
 
 ```sql
 -- Check user preferences
-SELECT * FROM ai_provider_preferences 
-WHERE organization_id = 'org_123' 
+SELECT * FROM ai_provider_preferences
+WHERE organization_id = 'org_123'
 AND user_id = 'user_456';
 
 -- Check organization usage
-SELECT preferred_provider, COUNT(*) 
-FROM ai_provider_preferences 
-WHERE organization_id = 'org_123' 
+SELECT preferred_provider, COUNT(*)
+FROM ai_provider_preferences
+WHERE organization_id = 'org_123'
 GROUP BY preferred_provider;
 ```
 
 ### **Logs to Watch**
+
 - `AI Provider API: Saved preference to database`
 - `API: Using DB preference: gemini`
 - `Failed to save preference to database`
@@ -165,18 +179,21 @@ GROUP BY preferred_provider;
 ## Troubleshooting
 
 ### **Preference Not Saving**
+
 1. Check user authentication
 2. Verify organization ID exists
 3. Check database connection
 4. Review console logs
 
 ### **Wrong Provider Being Used**
+
 1. Check database preference
 2. Verify in-memory provider
 3. Check environment variables
 4. Review API logs
 
 ### **Performance Issues**
+
 1. Check database indexes
 2. Monitor query performance
 3. Consider caching if needed
@@ -188,4 +205,4 @@ GROUP BY preferred_provider;
 - [ ] Cost tracking per provider
 - [ ] Organization-wide provider policies
 - [ ] Provider performance metrics
-- [ ] Automatic provider selection based on usage patterns 
+- [ ] Automatic provider selection based on usage patterns

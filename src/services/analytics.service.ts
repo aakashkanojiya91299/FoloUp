@@ -61,41 +61,44 @@ export const generateInterviewAnalytics = async (payload: {
     return { analytics: analyticsResponse, status: 200 };
   } catch (error: any) {
     console.error("Error in AI request:", error);
-    
+
     // Handle specific AI API errors
     if (error?.status === 429) {
       console.error("AI API quota exceeded");
-      return { 
-        error: "API quota exceeded. Please check your AI provider billing and try again later.",
-        details: "You have exceeded your current AI API quota. Please check your plan and billing details.",
-        status: 429 
+      return {
+        error:
+          "API quota exceeded. Please check your AI provider billing and try again later.",
+        details:
+          "You have exceeded your current AI API quota. Please check your plan and billing details.",
+        status: 429,
       };
     }
-    
+
     if (error?.status === 401) {
       console.error("AI API authentication failed");
-      return { 
+      return {
         error: "API authentication failed",
         details: "Invalid or missing API key. Please check your configuration.",
-        status: 401 
+        status: 401,
       };
     }
-    
+
     if (error?.status === 400) {
       console.error("AI API bad request");
-      return { 
+      return {
         error: "Invalid request to AI service",
         details: error.message || "The request to AI service was malformed.",
-        status: 400 
+        status: 400,
       };
     }
-    
+
     if (error?.status === 503 || error?.status === 502) {
       console.error("AI API service unavailable");
-      return { 
+      return {
         error: "AI service temporarily unavailable",
-        details: "AI services are currently experiencing issues. Please try again later.",
-        status: 503 
+        details:
+          "AI services are currently experiencing issues. Please try again later.",
+        status: 503,
       };
     }
 

@@ -16,7 +16,7 @@ export interface AIProviderPreference {
 
 export async function getAIProviderPreference(
   organizationId: string,
-  userId: string
+  userId: string,
 ): Promise<AIProviderPreference | null> {
   const supabase = createClientComponentClient();
 
@@ -40,7 +40,7 @@ export async function getAIProviderPreference(
 export async function setAIProviderPreference(
   organizationId: string,
   userId: string,
-  provider: AIProvider
+  provider: AIProvider,
 ): Promise<AIProviderPreference | null> {
   const supabase = createClientComponentClient();
 
@@ -82,7 +82,7 @@ export async function setAIProviderPreference(
 }
 
 export async function getOrganizationAIProviderPreference(
-  organizationId: string
+  organizationId: string,
 ): Promise<AIProviderPreference | null> {
   const supabase = createClientComponentClient();
 
@@ -105,7 +105,7 @@ export async function getOrganizationAIProviderPreference(
 
 export async function deleteAIProviderPreference(
   organizationId: string,
-  userId: string
+  userId: string,
 ): Promise<boolean> {
   const supabase = createClientComponentClient();
 
@@ -121,4 +121,4 @@ export async function deleteAIProviderPreference(
   }
 
   return true;
-} 
+}

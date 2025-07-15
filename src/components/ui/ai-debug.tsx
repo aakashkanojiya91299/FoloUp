@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import axios from "axios";
@@ -10,29 +16,44 @@ import axios from "axios";
 export function AIDebug() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState("");
-  const [testData, setTestData] = useState(JSON.stringify({
-    name: "Test Interview",
-    objective: "Test objective for debugging",
-    number: 3,
-    context: "Test context for debugging"
-  }, null, 2));
+  const [testData, setTestData] = useState(
+    JSON.stringify(
+      {
+        name: "Test Interview",
+        objective: "Test objective for debugging",
+        number: 3,
+        context: "Test context for debugging",
+      },
+      null,
+      2,
+    ),
+  );
 
   const testGenerateQuestions = async () => {
     setIsLoading(true);
     setResult("");
-    
+
     try {
       const data = JSON.parse(testData);
-      const response = await axios.post("/api/generate-interview-questions", data);
-      
+      const response = await axios.post(
+        "/api/generate-interview-questions",
+        data,
+      );
+
       setResult(JSON.stringify(response.data, null, 2));
       toast.success("Test completed successfully!");
     } catch (error: any) {
       console.error("Test failed:", error);
-      setResult(JSON.stringify({
-        error: error.response?.data || error.message,
-        status: error.response?.status
-      }, null, 2));
+      setResult(
+        JSON.stringify(
+          {
+            error: error.response?.data || error.message,
+            status: error.response?.status,
+          },
+          null,
+          2,
+        ),
+      );
       toast.error("Test failed. Check the result for details.");
     } finally {
       setIsLoading(false);
@@ -47,10 +68,16 @@ export function AIDebug() {
     } catch (error: any) {
       console.error("Provider switch failed:", error);
       toast.error("Failed to switch provider");
-      setResult(JSON.stringify({
-        error: error.response?.data || error.message,
-        status: error.response?.status
-      }, null, 2));
+      setResult(
+        JSON.stringify(
+          {
+            error: error.response?.data || error.message,
+            status: error.response?.status,
+          },
+          null,
+          2,
+        ),
+      );
     }
   };
 
@@ -60,10 +87,16 @@ export function AIDebug() {
       setResult(JSON.stringify(response.data, null, 2));
     } catch (error: any) {
       console.error("Failed to get provider:", error);
-      setResult(JSON.stringify({
-        error: error.response?.data || error.message,
-        status: error.response?.status
-      }, null, 2));
+      setResult(
+        JSON.stringify(
+          {
+            error: error.response?.data || error.message,
+            status: error.response?.status,
+          },
+          null,
+          2,
+        ),
+      );
     }
   };
 
@@ -80,10 +113,16 @@ export function AIDebug() {
           <Button onClick={getCurrentProvider} variant="outline">
             Get Current Provider
           </Button>
-          <Button onClick={() => testProviderSwitch("openai")} variant="outline">
+          <Button
+            onClick={() => testProviderSwitch("openai")}
+            variant="outline"
+          >
             Switch to OpenAI
           </Button>
-          <Button onClick={() => testProviderSwitch("gemini")} variant="outline">
+          <Button
+            onClick={() => testProviderSwitch("gemini")}
+            variant="outline"
+          >
             Switch to Gemini
           </Button>
         </div>
@@ -99,8 +138,8 @@ export function AIDebug() {
           />
         </div>
 
-        <Button 
-          onClick={testGenerateQuestions} 
+        <Button
+          onClick={testGenerateQuestions}
           disabled={isLoading}
           className="w-full"
         >
@@ -118,4 +157,4 @@ export function AIDebug() {
       </CardContent>
     </Card>
   );
-} 
+}

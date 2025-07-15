@@ -7,4 +7,4 @@ export default function DebugPage() {
       <AIDebug />
     </div>
   );
-} 
+}

@@ -10,7 +10,7 @@ Add the following variables to your `.env.local` file:
 # OpenAI Configuration
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Google Gemini Configuration  
+# Google Gemini Configuration
 GEMINI_API_KEY=your_gemini_api_key_here
 
 # Default AI Provider (optional)
@@ -22,6 +22,7 @@ AI_PROVIDER=openai
 ## Getting API Keys
 
 ### OpenAI API Key
+
 1. Visit [OpenAI Platform](https://platform.openai.com/)
 2. Sign up or log in to your account
 3. Go to "API Keys" in the sidebar
@@ -29,6 +30,7 @@ AI_PROVIDER=openai
 5. Copy the key and add it to your `.env.local` file
 
 ### Google Gemini API Key
+
 1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Sign in with your Google account
 3. Click "Create API Key"
@@ -38,16 +40,17 @@ AI_PROVIDER=openai
 
 The application automatically maps OpenAI models to equivalent Gemini models:
 
-| OpenAI Model | Gemini Model | Use Case |
-|--------------|--------------|----------|
-| gpt-4o | gemini-1.5-pro | High-quality responses, complex tasks |
-| gpt-4 | gemini-1.5-pro | High-quality responses |
-| gpt-3.5-turbo | gemini-1.5-flash | Fast, cost-effective responses |
-| gpt-4.1 | gemini-1.5-pro | High-quality responses |
+| OpenAI Model  | Gemini Model     | Use Case                              |
+| ------------- | ---------------- | ------------------------------------- |
+| gpt-4o        | gemini-1.5-pro   | High-quality responses, complex tasks |
+| gpt-4         | gemini-1.5-pro   | High-quality responses                |
+| gpt-3.5-turbo | gemini-1.5-flash | Fast, cost-effective responses        |
+| gpt-4.1       | gemini-1.5-pro   | High-quality responses                |
 
 ## Switching Providers
 
 ### Via API
+
 ```bash
 # Get current provider
 GET /api/ai-provider
@@ -66,9 +69,11 @@ POST /api/ai-provider
 ```
 
 ### Via Environment Variable
+
 Set `AI_PROVIDER=gemini` in your `.env.local` file to use Gemini as the default.
 
 ### Via UI Component
+
 Use the `AIProviderSwitcher` component in your application:
 
 ```tsx
@@ -95,11 +100,13 @@ The AI service includes automatic fallback functionality:
 ## Cost Comparison
 
 ### OpenAI Pricing (as of 2024)
+
 - GPT-4o: $5.00 per 1M input tokens, $15.00 per 1M output tokens
 - GPT-4: $30.00 per 1M input tokens, $60.00 per 1M output tokens
 - GPT-3.5-turbo: $0.50 per 1M input tokens, $1.50 per 1M output tokens
 
 ### Google Gemini Pricing (as of 2024)
+
 - Gemini 1.5 Pro: $3.50 per 1M input tokens, $10.50 per 1M output tokens
 - Gemini 1.5 Flash: $0.075 per 1M input tokens, $0.30 per 1M output tokens
 
@@ -134,4 +141,4 @@ The AI service includes automatic fallback functionality:
 
 - OpenAI: [OpenAI Help Center](https://help.openai.com/)
 - Google Gemini: [Google AI Studio Help](https://ai.google.dev/docs)
-- Application Issues: Check the application logs for detailed error information 
+- Application Issues: Check the application logs for detailed error information

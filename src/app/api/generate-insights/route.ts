@@ -63,47 +63,51 @@ export async function POST(req: Request, res: Response) {
     );
   } catch (error: any) {
     logger.error(error);
-    
+
     // Handle specific AI API errors
     if (error?.status === 429) {
       logger.error("AI API quota exceeded");
       return NextResponse.json(
-        { 
-          error: "API quota exceeded. Please check your AI provider billing and try again later.",
-          details: "You have exceeded your current AI API quota. Please check your plan and billing details."
+        {
+          error:
+            "API quota exceeded. Please check your AI provider billing and try again later.",
+          details:
+            "You have exceeded your current AI API quota. Please check your plan and billing details.",
         },
         { status: 429 },
       );
     }
-    
+
     if (error?.status === 401) {
       logger.error("AI API authentication failed");
       return NextResponse.json(
-        { 
+        {
           error: "API authentication failed",
-          details: "Invalid or missing API key. Please check your configuration."
+          details:
+            "Invalid or missing API key. Please check your configuration.",
         },
         { status: 401 },
       );
     }
-    
+
     if (error?.status === 400) {
       logger.error("AI API bad request");
       return NextResponse.json(
-        { 
+        {
           error: "Invalid request to AI service",
-          details: error.message || "The request to AI service was malformed."
+          details: error.message || "The request to AI service was malformed.",
         },
         { status: 400 },
       );
     }
-    
+
     if (error?.status === 503 || error?.status === 502) {
       logger.error("AI API service unavailable");
       return NextResponse.json(
-        { 
+        {
           error: "AI service temporarily unavailable",
-          details: "AI services are currently experiencing issues. Please try again later."
+          details:
+            "AI services are currently experiencing issues. Please try again later.",
         },
         { status: 503 },
       );
@@ -111,9 +115,9 @@ export async function POST(req: Request, res: Response) {
 
     logger.error("Error generating insights");
     return NextResponse.json(
-      { 
+      {
         error: "Internal server error",
-        details: "An unexpected error occurred while generating insights."
+        details: "An unexpected error occurred while generating insights.",
       },
       { status: 500 },
     );
