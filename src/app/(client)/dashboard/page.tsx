@@ -119,7 +119,7 @@ function Interviews() {
               {isModalOpen && (
                 <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
                   <div className="flex flex-col space-y-4">
-                    <div className="flex justify-center text-indigo-600">
+                    <div className="flex justify-center text-[#06546e]">
                       <Gem />
                     </div>
                     <h3 className="text-xl font-semibold text-center">
@@ -160,7 +160,7 @@ function Interviews() {
                     </div>
                     <p className="text-l text-center">
                       Contact{" "}
-                      <span className="font-semibold">founders@folo-up.co</span>{" "}
+                      <span className="font-semibold">info@stspl.com</span>{" "}
                       to upgrade your plan.
                     </p>
                   </div>

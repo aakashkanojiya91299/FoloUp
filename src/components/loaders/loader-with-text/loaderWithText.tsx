@@ -7,8 +7,8 @@ function LoaderWithText() {
         classNames={{
           base: "animate-spin",
           svg: "w-36 h-36 ",
-          indicator: "stroke-indigo-600",
-          track: "stroke-indigo-200",
+          indicator: "stroke-[#06546e]",
+          track: "stroke-[#06546e]/20",
         }}
         strokeWidth={2}
         disableAnimation={true}

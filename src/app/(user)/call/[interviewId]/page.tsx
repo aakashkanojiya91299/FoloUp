@@ -30,17 +30,23 @@ function PopupLoader() {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-        href="https://folo-up.co/"
+        href="https://stspl.com/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
           Powered by{" "}
-          <span className="font-bold">
-            Folo<span className="text-indigo-600">Up</span>
+          <span className="font-bold flex items-center gap-1">
+            <Image
+              src="/sts-logo.svg"
+              alt="STS Logo"
+              width={60}
+              height={20}
+              className="h-4 w-auto"
+            />
           </span>
         </div>
-        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-indigo-500" />
+        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-[#06546e]" />
       </a>
     </div>
   );
@@ -64,17 +70,23 @@ function PopUpMessage({ title, description, image }: PopupProps) {
       </div>
       <a
         className="flex flex-row justify-center align-middle mt-3"
-        href="https://folo-up.co/"
+        href="https://stspl.com/"
         target="_blank"
         rel="noopener noreferrer"
       >
         <div className="text-center text-md font-semibold mr-2">
           Powered by{" "}
-          <span className="font-bold">
-            Folo<span className="text-indigo-600">Up</span>
+          <span className="font-bold flex items-center gap-1">
+            <Image
+              src="/sts-logo.svg"
+              alt="STS Logo"
+              width={60}
+              height={20}
+              className="h-4 w-auto"
+            />
           </span>
         </div>
-        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-indigo-500" />
+        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-[#06546e]" />
       </a>
     </div>
   );
@@ -144,15 +156,17 @@ function InterviewInterface({ params }: Props) {
             inconvenience caused.{" "}
           </p>
         </div>
-        <div className="text-center text-md font-semibold mr-2 my-5">
+        <div className="text-center text-md font-semibold mr-2">
           Powered by{" "}
-          <a
-            className="font-bold underline"
-            href="www.folo-up.co"
-            target="_blank"
-          >
-            Folo<span className="text-indigo-600">Up</span>
-          </a>
+          <span className="font-bold flex items-center gap-1">
+            <Image
+              src="/sts-logo.svg"
+              alt="STS Logo"
+              width={60}
+              height={20}
+              className="h-4 w-auto"
+            />
+          </span>
         </div>
       </div>
     </div>

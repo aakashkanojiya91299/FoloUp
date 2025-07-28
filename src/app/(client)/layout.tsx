@@ -13,15 +13,15 @@ import { usePathname } from "next/navigation";
 const inter = Inter({ subsets: ["latin"] });
 
 const metadata = {
-  title: "FoloUp",
+  title: "STS",
   description: " AI-powered Interviews",
   openGraph: {
-    title: "FoloUp",
+    title: "STS",
     description: "AI-powered Interviews",
-    siteName: "FoloUp",
+    siteName: "STS",
     images: [
       {
-        url: "/foloup.png",
+        url: "/sts-logo.svg",
         width: 800,
         height: 600,
       },
@@ -71,8 +71,8 @@ export default function RootLayout({
                   toast: "bg-white",
                   title: "text-black",
                   description: "text-red-400",
-                  actionButton: "bg-indigo-400",
-                  cancelButton: "bg-orange-400",
+                  actionButton: "bg-[#06546e]",
+                  cancelButton: "bg-[#f26622]",
                   closeButton: "bg-white-400",
                 },
               }}

@@ -2,11 +2,13 @@
 ![License](https://img.shields.io/github/license/foloup/foloup)
 [![Twitter Follow](https://img.shields.io/twitter/follow/SuveenE?style=social)](https://x.com/SuveenE)
 
-# FoloUp - AI-powered voice interviewer for hiring 💼
+# STS - AI-powered voice interviewer for hiring 💼
 
-FoloUp is an open source platform for companies to conduct AI powered hiring interviews with their candidates.
+STS is an open source platform for companies to conduct AI powered hiring interviews with their candidates.
 
-<img src="https://github.com/user-attachments/assets/fa92ade1-02ea-4332-b5ed-97056dea01c3" alt="FoloUp Logo" width="800">
+<div align="center">
+  <img src="/sts-logo.svg" alt="STS Logo" width="300" style="margin: 20px 0;">
+</div>
 
 <div style="display: flex; flex-direction: row; gap: 20px; margin: 20px 0;">
   <picture>
@@ -123,7 +125,7 @@ If you find FoloUp helpful, please consider giving us a star on GitHub! It helps
 
 ## Contact
 
-If you have any questions or feedback, please feel free to reach out to us at [suveen.te1[at]gmail.com](mailto:suveen.te1@gmail.com).
+If you have any questions or feedback, please feel free to reach out to us at [info@stspl.com](mailto:info@stspl.com).
 
 ## License
 

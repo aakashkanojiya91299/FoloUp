@@ -50,6 +50,10 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sts: {
+          blue: "#06546e",
+          orange: "#f26622",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -72,5 +76,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],
+  plugins: [require("tailwindcss-animate")],
 };
