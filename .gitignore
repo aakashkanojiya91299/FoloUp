@@ -24,6 +24,12 @@
 *.pdf
 *.docx
 
+# Test files
+tests/
+test_pdf_parsing.js
+test_gemini.js
+debug_gemini.js
+
 # debug
 npm-debug.log*
 yarn-debug.log*
