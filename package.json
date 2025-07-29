@@ -97,7 +97,7 @@
     "@types/react-color": "^3.0.12",
     "@types/react-dom": "^18",
     "@types/regenerator-runtime": "^0.13.5",
-    "autoprefixer": "^10.0.1",
+    "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
