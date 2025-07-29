@@ -5,13 +5,15 @@ import { useOrganization } from "@clerk/nextjs";
 import InterviewCard from "@/components/dashboard/interview/interviewCard";
 import CreateInterviewCard from "@/components/dashboard/interview/createInterviewCard";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { InterviewService } from "@/services/interviews.service";
 import { ClientService } from "@/services/clients.service";
 import { ResponseService } from "@/services/responses.service";
 import { useInterviews } from "@/contexts/interviews.context";
 import Modal from "@/components/dashboard/Modal";
-import { Gem, Plus } from "lucide-react";
+import { Gem, Plus, Users, FileText } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 function Interviews() {
   const { interviews, interviewsLoading } = useInterviews();
@@ -97,6 +99,33 @@ function Interviews() {
         <h3 className=" text-sm tracking-tight text-gray-600 font-medium ">
           Start getting responses now!
         </h3>
+        
+        {/* ATS Candidates Section */}
+        <div className="mt-8 mb-6">
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">ATS Candidate Management</h3>
+                    <p className="text-sm text-gray-600">
+                      Upload resumes and analyze candidates against interview job descriptions
+                    </p>
+                  </div>
+                </div>
+                <Link href="/dashboard/ats-candidates">
+                  <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                    <FileText className="h-4 w-4" />
+                    Manage Candidates
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         <div className="relative flex items-center mt-1 flex-wrap">
           {currentPlan == "free_trial_over" ? (
             <Card className=" flex bg-gray-200 items-center border-dashed border-gray-700 border-2 hover:scale-105 ease-in-out duration-300 h-60 w-56 ml-1 mr-3 mt-4 rounded-xl shrink-0 overflow-hidden shadow-md">

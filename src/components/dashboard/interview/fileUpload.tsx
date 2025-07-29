@@ -5,6 +5,7 @@ import { Inbox } from "lucide-react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { parsePdf } from "@/actions/parse-pdf";
+import { parseDocx } from "@/actions/parse-docx";
 
 type Props = {
   isUploaded: boolean;
@@ -25,10 +26,21 @@ function FileUpload({
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { "application/pdf": [".pdf"] },
+    accept: { 
+      "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/msword": [".doc"]
+    },
     maxFiles: 1,
     onDrop: async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
+      if (!file) {
+        toast.error("No file selected", {
+          position: "bottom-right",
+          duration: 3000,
+        });
+        return;
+      }
       setFileName(file.name);
       if (file.size > 10 * 1024 * 1024) {
         toast.error("Please upload a file smaller than 10MB.", {
@@ -44,7 +56,17 @@ function FileUpload({
         const formData = new FormData();
         formData.append("file", file);
 
-        const result = await parsePdf(formData);
+        let result;
+        const fileExtension = file.name.toLowerCase().split('.').pop();
+        
+        if (fileExtension === 'pdf') {
+          result = await parsePdf(formData);
+        } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+          result = await parseDocx(formData);
+        } else {
+          throw new Error("Unsupported file type");
+        }
+
         if (!result.success) {
           throw new Error(result.error);
         }
@@ -53,8 +75,8 @@ function FileUpload({
         setIsUploaded(true);
       } catch (error) {
         console.log(error);
-        toast.error("Error reading PDF", {
-          description: "Please try again.",
+        toast.error("Error reading file", {
+          description: "Please try again with a supported file type (PDF, DOCX, DOC).",
           duration: 3000,
         });
       } finally {
@@ -76,7 +98,7 @@ function FileUpload({
           <>
             <>
               <Inbox className="w-8 h-8 text-blue-500" />
-              <p className="mt-2 text-sm text-slate-400">Drop PDF Here</p>
+              <p className="mt-2 text-sm text-slate-400">Drop PDF, DOCX, or DOC Here</p>
             </>
           </>
         </div>

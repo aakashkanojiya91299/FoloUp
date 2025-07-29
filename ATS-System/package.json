@@ -1,0 +1,37 @@
+{
+  "name": "ats-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node-dev --respawn src/server.ts",
+    "test_start": "npx ts-node src/test-huggingface.ts",
+    "run_dev": "node dist/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "mammoth": "^1.9.1",
+    "multer": "^2.0.1",
+    "natural": "^8.1.0",
+    "pdf-parse": "^1.1.1",
+    "string-similarity": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.0.12",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/string-similarity": "^4.0.2",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}

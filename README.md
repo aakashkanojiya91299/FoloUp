@@ -26,6 +26,41 @@ STS is an open source platform for companies to conduct AI powered hiring interv
 - **🎙️ AI Voice Interviews:** Let our AI conduct natural, conversational interviews that adapt to candidate responses.
 - **📊 Smart Analysis:** Get detailed insights and scores for each interview response, powered by advanced AI.
 - **📈 Comprehensive Dashboard:** Track all candidate performances and overall stats.
+- **📋 Applications Management:** Admin-only interviewee registration with ATS scanner for resume analysis.
+
+## Applications Management
+
+The Applications feature provides comprehensive interviewee management with ATS (Applicant Tracking System) capabilities:
+
+### **Interviewee Registration**
+- Add and manage interviewees with contact information
+- Track interviewee status (active, inactive, archived)
+- Add notes and additional information
+
+### **Resume Management**
+- Upload multiple resumes per interviewee
+- Support for PDF, DOC, and DOCX formats
+- Automatic file storage with secure access controls
+- Resume status tracking (pending, processed, failed)
+
+### **ATS Scanner & Analysis**
+- **Resume Parsing:** Extract skills, experience, education, and certifications
+- **ATS Scoring:** Calculate match percentages for skills, experience, and education
+- **Detailed Analysis:** Get comprehensive breakdown of technical and soft skills
+- **Recommendations:** Receive actionable suggestions to improve resume match
+- **Job Requirements Matching:** Compare resumes against specific job requirements
+
+### **Admin-Only Access**
+- Secure admin-only interface for interviewee management
+- Organization-based data isolation
+- Role-based access controls with Row Level Security (RLS)
+
+### **Key Benefits**
+- **Centralized Management:** All interviewee data in one place
+- **ATS Integration:** Professional-grade resume analysis
+- **Secure Storage:** Encrypted file storage with access controls
+- **Scalable:** Handle multiple interviewees and resumes efficiently
+- **Insights:** Get detailed analytics on candidate qualifications
 
 Here's a [loom](https://www.loom.com/share/762fd7d12001490bbfdcf3fac37ff173?sid=9a5b2a5a-64df-4c4c-a0e7-fc9765691f81) of me explaining the app.
 

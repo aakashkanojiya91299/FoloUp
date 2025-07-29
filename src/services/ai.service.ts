@@ -123,6 +123,18 @@ return this.gemini;
     console.log(
       `AI Service: Using provider ${targetProvider} (requested: ${provider}, default: ${globalCurrentProvider})`,
     );
+    
+    // Log the original request being passed to the AI service
+    console.log('📤 AI Service: Original request received:');
+    console.log('📤 AI Service: Model:', request.model);
+    console.log('📤 AI Service: Temperature:', request.temperature);
+    console.log('📤 AI Service: Max Tokens:', request.maxTokens);
+    console.log('📤 AI Service: Response Format:', request.responseFormat);
+    console.log('📤 AI Service: Number of messages:', request.messages.length);
+    console.log('📤 AI Service: Messages:');
+    request.messages.forEach((msg, index) => {
+      console.log(`  ${index + 1}. Role: ${msg.role}, Content: ${msg.content.substring(0, 100)}...`);
+    });
 
     try {
       if (targetProvider === "openai") {
@@ -133,20 +145,25 @@ return this.gemini;
         throw new Error(`Unsupported AI provider: ${targetProvider}`);
       }
     } catch (error: any) {
+      console.error(`❌ AI Service: ${targetProvider} failed with error:`, error.message);
+      
       // If the primary provider fails, try the fallback
       if (targetProvider !== globalCurrentProvider) {
+        console.log(`❌ AI Service: Already using fallback provider, throwing error`);
         throw error; // Don't retry if we're already using fallback
       }
 
       const fallbackProvider =
         globalCurrentProvider === "openai" ? "gemini" : "openai";
       console.log(
-        `Primary provider ${targetProvider} failed, trying fallback: ${fallbackProvider}`,
+        `🔄 AI Service: Primary provider ${targetProvider} failed, trying fallback: ${fallbackProvider}`,
       );
 
       try {
+        console.log(`🔄 AI Service: Attempting fallback with ${fallbackProvider}...`);
         return await this.createCompletion(request, fallbackProvider);
-      } catch (fallbackError) {
+      } catch (fallbackError: any) {
+        console.error(`❌ AI Service: Fallback ${fallbackProvider} also failed:`, fallbackError.message);
         // If both providers fail, throw the original error
         throw error;
       }
@@ -186,18 +203,25 @@ return this.gemini;
   private async createGeminiCompletion(
     request: AICompletionRequest,
   ): Promise<AICompletionResponse> {
-    const gemini = this.initializeGemini();
+    console.log('🔍 Gemini Debug: Starting Gemini completion...');
+    
+    try {
+      const gemini = this.initializeGemini();
+      console.log('✅ Gemini Debug: Gemini client initialized successfully');
 
-    // Map OpenAI models to Gemini models
-    const modelMap: Record<string, string> = {
-      "gpt-4o": "gemini-2.0-flash",
-      "gpt-4": "gemini-2.0-flash",
-      "gpt-3.5-turbo": "gemini-2.0-flash",
-      "gpt-4.1": "gemini-2.0-flash",
-    };
+      // Map OpenAI models to Gemini models
+      const modelMap: Record<string, string> = {
+        "gpt-4o": "gemini-2.5-flash",
+        "gpt-4": "gemini-2.5-flash",
+        "gpt-3.5-turbo": "gemini-2.5-flash",
+        "gpt-4.1": "gemini-2.5-flash",
+      };
 
-    const geminiModel = modelMap[request.model] || "gemini-2.0-flash";
-    const model = gemini.getGenerativeModel({ model: geminiModel });
+      const geminiModel = modelMap[request.model] || "gemini-2.5-flash";
+      console.log(`🔧 Gemini Debug: Using model: ${geminiModel} (mapped from: ${request.model})`);
+      
+      const model = gemini.getGenerativeModel({ model: geminiModel });
+      console.log('✅ Gemini Debug: Model created successfully');
 
     // Convert OpenAI messages to Gemini format
     const geminiMessages = request.messages.map((msg) => ({
@@ -231,33 +255,72 @@ return this.gemini;
       parts: [{ text: msg.content }],
     }));
 
-    const result = await model.generateContent({
-      contents: geminiUserMessages,
-      generationConfig: {
-        temperature: request.temperature || 0.7,
-        maxOutputTokens: request.maxTokens || 2048,
-        responseMimeType:
-          request.responseFormat?.type === "json_object"
-            ? "application/json"
-            : "text/plain",
-      },
-    });
+      console.log('🔧 Gemini Debug: Converted messages to Gemini format');
+      console.log('📝 Gemini Debug: Number of messages:', request.messages.length);
+      console.log('📝 Gemini Debug: First message preview:', userMessages[0]?.content?.substring(0, 100) + "...");
 
-    const response = await result.response;
-    const text = response.text();
+      // Log the complete request being sent to Gemini
+      const geminiRequest = {
+        contents: geminiUserMessages,
+        generationConfig: {
+          temperature: request.temperature || 0.7,
+          maxOutputTokens: request.maxTokens || 2048,
+          responseMimeType:
+            request.responseFormat?.type === "json_object"
+              ? "application/json"
+              : "text/plain",
+        },
+      };
+      
+      console.log('📤 Gemini Debug: Request being sent to Gemini:');
+      console.log(JSON.stringify(geminiRequest, null, 2));
 
-    if (!text) {
-      throw new Error("No content received from Gemini");
+      console.log('🚀 Gemini Debug: Calling model.generateContent...');
+      const result = await model.generateContent(geminiRequest);
+      console.log('✅ Gemini Debug: Model.generateContent completed successfully');
+      
+      console.log('🔄 Gemini Debug: Getting response...');
+      const response = await result.response;
+      console.log('✅ Gemini Debug: Response received');
+      
+      const text = response.text();
+      console.log('📝 Gemini Debug: Response text length:', text.length);
+      console.log('📝 Gemini Debug: Response preview:', text.substring(0, 200) + "...");
+      
+      // Log the complete response from Gemini
+      console.log('📥 Gemini Debug: Complete response from Gemini:');
+      console.log('📥 Gemini Debug: Raw response text:');
+      console.log(text);
+      
+      // Try to parse as JSON if it looks like JSON
+      try {
+        if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+          const parsedJson = JSON.parse(text);
+          console.log('📥 Gemini Debug: Parsed JSON response:');
+          console.log(JSON.stringify(parsedJson, null, 2));
+        }
+      } catch (jsonError) {
+        console.log('📥 Gemini Debug: Response is not valid JSON, treating as plain text');
+      }
+
+      if (!text) {
+        throw new Error("No content received from Gemini");
+      }
+
+      return {
+        content: text,
+        usage: {
+          promptTokens: response.usageMetadata?.promptTokenCount,
+          completionTokens: response.usageMetadata?.candidatesTokenCount,
+          totalTokens: response.usageMetadata?.totalTokenCount,
+        },
+      };
+    } catch (error: any) {
+      console.error('❌ Gemini Debug: Error in createGeminiCompletion:', error);
+      console.error('❌ Gemini Debug: Error message:', error.message);
+      console.error('❌ Gemini Debug: Error stack:', error.stack);
+      throw error;
     }
-
-    return {
-      content: text,
-      usage: {
-        promptTokens: response.usageMetadata?.promptTokenCount,
-        completionTokens: response.usageMetadata?.candidatesTokenCount,
-        totalTokens: response.usageMetadata?.totalTokenCount,
-      },
-    };
   }
 
   // Helper method to get the current provider

@@ -187,6 +187,7 @@ function DetailsPopup({
           question_count: Number(numQuestions),
           time_duration: duration,
           description: generatedQuestionsResponse.description,
+          job_description: uploadedDocumentContext,
           is_anonymous: isAnonymous,
         };
         setInterviewData(updatedInterviewData);
@@ -223,6 +224,7 @@ function DetailsPopup({
       question_count: Number(numQuestions),
       time_duration: String(duration),
       description: "",
+      job_description: uploadedDocumentContext,
       is_anonymous: isAnonymous,
     };
     setInterviewData(updatedInterviewData);

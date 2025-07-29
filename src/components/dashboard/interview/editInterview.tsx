@@ -3,7 +3,8 @@
 import { Interview, Question } from "@/types/interview";
 import React, { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Plus, SaveIcon, TrashIcon } from "lucide-react";
+import { Plus, SaveIcon, TrashIcon, FileText } from "lucide-react";
+import FileUpload from "./fileUpload";
 import { useInterviewers } from "@/contexts/interviewers.context";
 import QuestionCard from "@/components/dashboard/interview/create-popup/questionCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,6 +59,13 @@ function EditInterview({ interview }: EditInterviewProps) {
     interview?.is_anonymous || false,
   );
 
+  const [jobDescription, setJobDescription] = useState<string>(
+    interview?.job_description || "",
+  );
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [uploadedDocumentContext, setUploadedDocumentContext] = useState("");
+
   const [isClicked, setIsClicked] = useState(false);
 
   const endOfListRef = useRef<HTMLDivElement>(null);
@@ -108,6 +116,7 @@ function EditInterview({ interview }: EditInterviewProps) {
       question_count: questionCount,
       time_duration: Number(duration),
       description: description,
+      job_description: uploadedDocumentContext || jobDescription,
       is_anonymous: isAnonymous,
     };
 
@@ -240,6 +249,54 @@ function EditInterview({ interview }: EditInterviewProps) {
           onChange={(e) => setObjective(e.target.value)}
           onBlur={(e) => setObjective(e.target.value.trim())}
         />
+        
+        {/* Job Description Section */}
+        <div className="mt-4 ml-2">
+          <p className="mb-2 font-medium flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Job Description
+            <span className="text-xs ml-2 font-normal">
+              (Used for ATS resume matching)
+            </span>
+          </p>
+          
+          {/* File Upload */}
+          <div className="mb-3">
+            <p className="text-sm text-gray-600 mb-2">
+              Upload job description document (PDF, DOCX, DOC):
+            </p>
+            <FileUpload
+              isUploaded={isUploaded}
+              setIsUploaded={setIsUploaded}
+              fileName={fileName}
+              setFileName={setFileName}
+              setUploadedDocumentContext={setUploadedDocumentContext}
+            />
+          </div>
+          
+          {/* Manual Job Description Input */}
+          <div>
+            <p className="text-sm text-gray-600 mb-2">
+              Or enter job description manually:
+            </p>
+            <textarea
+              value={jobDescription}
+              className="h-fit py-2 border-2 rounded-md w-[75%] px-2 border-gray-400"
+              placeholder="Enter job description here for ATS resume matching..."
+              rows={4}
+              onChange={(e) => setJobDescription(e.target.value)}
+              onBlur={(e) => setJobDescription(e.target.value.trim())}
+            />
+          </div>
+          
+          {/* Current Job Description Display */}
+          {interview?.job_description && !uploadedDocumentContext && (
+            <div className="mt-3 p-3 bg-blue-50 rounded-md">
+              <p className="text-sm font-medium text-blue-800 mb-2">Current Job Description:</p>
+              <p className="text-sm text-blue-700">{interview.job_description}</p>
+            </div>
+          )}
+        </div>
         <div className="flex flex-row gap-3">
           <div>
             <p className="mt-3 mb-1 ml-2 font-medium">Interviewer</p>

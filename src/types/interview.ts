@@ -20,6 +20,7 @@ export interface InterviewBase {
   is_anonymous: boolean;
   questions: Question[];
   description: string;
+  job_description?: string;
   response_count: bigint;
 }
 
@@ -37,4 +38,6 @@ export interface InterviewDetails {
   readable_slug: string;
 }
 
-export interface Interview extends InterviewBase, InterviewDetails {}
+export interface Interview extends InterviewBase, InterviewDetails {
+  job_description?: string;
+}
