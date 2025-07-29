@@ -14,8 +14,9 @@ export class IntervieweeService {
       .select()
       .single();
 
-    if (error) throw error;
-    return interviewee;
+    if (error) {throw error;}
+    
+return interviewee;
   }
 
   static async getIntervieweesByOrganization(organizationId: string): Promise<Interviewee[]> {
@@ -25,8 +26,9 @@ export class IntervieweeService {
       .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return interviewees;
+    if (error) {throw error;}
+    
+return interviewees;
   }
 
   static async getIntervieweesByInterview(interviewId: string): Promise<Interviewee[]> {
@@ -36,8 +38,9 @@ export class IntervieweeService {
       .eq('interview_id', interviewId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return interviewees;
+    if (error) {throw error;}
+    
+return interviewees;
   }
 
   static async getIntervieweeById(id: string): Promise<Interviewee> {
@@ -47,8 +50,9 @@ export class IntervieweeService {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
-    return interviewee;
+    if (error) {throw error;}
+    
+return interviewee;
   }
 
   static async updateInterviewee(id: string, data: Partial<Interviewee>): Promise<Interviewee> {
@@ -62,8 +66,9 @@ export class IntervieweeService {
       .select()
       .single();
 
-    if (error) throw error;
-    return interviewee;
+    if (error) {throw error;}
+    
+return interviewee;
   }
 
   static async deleteInterviewee(id: string): Promise<void> {
@@ -72,7 +77,7 @@ export class IntervieweeService {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {throw error;}
   }
 
   // Resume Management with API Route
@@ -100,7 +105,8 @@ export class IntervieweeService {
       }
 
       const result = await response.json();
-      return result.resume;
+      
+return result.resume;
     } catch (error) {
       console.error('Resume upload error:', error);
       throw error;
@@ -114,8 +120,9 @@ export class IntervieweeService {
       .eq('interviewee_id', intervieweeId)
       .order('uploaded_at', { ascending: false });
 
-    if (error) throw error;
-    return resumes;
+    if (error) {throw error;}
+    
+return resumes;
   }
 
   static async getResumesByInterview(interviewId: string): Promise<Resume[]> {
@@ -125,8 +132,9 @@ export class IntervieweeService {
       .eq('interview_id', interviewId)
       .order('uploaded_at', { ascending: false });
 
-    if (error) throw error;
-    return resumes;
+    if (error) {throw error;}
+    
+return resumes;
   }
 
   static async getResumeById(id: string): Promise<Resume> {
@@ -136,8 +144,9 @@ export class IntervieweeService {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
-    return resume;
+    if (error) {throw error;}
+    
+return resume;
   }
 
   static async updateResume(id: string, data: Partial<Resume>): Promise<Resume> {
@@ -148,8 +157,9 @@ export class IntervieweeService {
       .select()
       .single();
 
-    if (error) throw error;
-    return resume;
+    if (error) {throw error;}
+    
+return resume;
   }
 
   static async deleteResume(id: string): Promise<void> {
@@ -162,7 +172,7 @@ export class IntervieweeService {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {throw error;}
 
     // Note: File deletion would need to be handled by an API route
     // For now, we'll just delete from database
@@ -195,7 +205,8 @@ export class IntervieweeService {
       }
 
       const result = await response.json();
-      return result.analysis;
+      
+return result.analysis;
     } catch (error) {
       console.error('ATS Analysis error:', error);
       throw error;
@@ -209,8 +220,9 @@ export class IntervieweeService {
       .eq('resume_id', resumeId)
       .single();
 
-    if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "not found"
-    return analysis;
+    if (error && error.code !== 'PGRST116') {throw error;} // PGRST116 is "not found"
+    
+return analysis;
   }
 
   static async getResumeAnalysesByInterview(interviewId: string): Promise<ResumeAnalysis[]> {
@@ -220,8 +232,9 @@ export class IntervieweeService {
       .eq('interview_id', interviewId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return analyses;
+    if (error) {throw error;}
+    
+return analyses;
   }
 
   // Job Requirements Management
@@ -236,8 +249,9 @@ export class IntervieweeService {
       .select()
       .single();
 
-    if (error) throw error;
-    return requirements;
+    if (error) {throw error;}
+    
+return requirements;
   }
 
   static async getJobRequirementsByOrganization(organizationId: string): Promise<ATSJobRequirements[]> {
@@ -247,8 +261,9 @@ export class IntervieweeService {
       .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return requirements;
+    if (error) {throw error;}
+    
+return requirements;
   }
 
   static async getJobRequirementsByInterview(interviewId: string): Promise<ATSJobRequirements[]> {
@@ -258,8 +273,9 @@ export class IntervieweeService {
       .eq('interview_id', interviewId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return requirements;
+    if (error) {throw error;}
+    
+return requirements;
   }
 
   // Interview Management
@@ -271,8 +287,9 @@ export class IntervieweeService {
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return interviews;
+    if (error) {throw error;}
+    
+return interviews;
   }
 
   static async getInterviewById(id: string): Promise<any> {
@@ -282,7 +299,8 @@ export class IntervieweeService {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
-    return interview;
+    if (error) {throw error;}
+    
+return interview;
   }
 } 

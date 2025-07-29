@@ -108,7 +108,7 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-md">
           <FileText className="h-16 w-16 text-gray-400 mb-4" />
           <p className="text-gray-600 mb-2">Preview not available for this file type</p>
-          <Button onClick={handleDownload} variant="outline">
+          <Button variant="outline" onClick={handleDownload}>
             <Download className="mr-2 h-4 w-4" />
             Download to View
           </Button>
@@ -132,11 +132,11 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleDownload} variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="mr-2 h-4 w-4" />
                 Download
               </Button>
-              <Button onClick={onClose} variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={onClose}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -148,7 +148,7 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
             <div className="flex flex-col items-center justify-center h-64 bg-red-50 rounded-md">
               <FileText className="h-16 w-16 text-red-400 mb-4" />
               <p className="text-red-600 mb-2">{error}</p>
-              <Button onClick={handleDownload} variant="outline">
+              <Button variant="outline" onClick={handleDownload}>
                 <Download className="mr-2 h-4 w-4" />
                 Download File
               </Button>

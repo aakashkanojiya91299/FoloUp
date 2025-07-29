@@ -70,6 +70,7 @@ export default function ATSBulkUpload({
 
     if (!acceptedFiles || acceptedFiles.length === 0) {
       console.log("No files accepted");
+
       return;
     }
 
@@ -79,6 +80,7 @@ export default function ATSBulkUpload({
         preview: URL.createObjectURL(file)
       };
       console.log("Created file with preview:", fileWithPreview.file.name);
+
       return fileWithPreview;
     });
 
@@ -86,6 +88,7 @@ export default function ATSBulkUpload({
       const newFiles = [...prev, ...filesWithPreview];
       console.log("Updated resume files count:", newFiles.length);
       console.log("Updated resume files names:", newFiles.map(f => f?.file?.name || 'undefined'));
+
       return newFiles;
     });
     setError(null);
@@ -105,8 +108,7 @@ export default function ATSBulkUpload({
     },
     onDragEnter: () => console.log("🎯 Drag enter"),
     onDragLeave: () => console.log("🎯 Drag leave"),
-    onDragOver: () => console.log("🎯 Drag over"),
-    onClick: () => console.log("🎯 Dropzone clicked")
+    onDragOver: () => console.log("🎯 Drag over")
   });
 
   const checkServerStatus = async () => {
@@ -121,11 +123,13 @@ export default function ATSBulkUpload({
   const handleBulkAnalyze = async () => {
     if (!interview.job_description) {
       setError("No job description found for this interview. Please add one to enable ATS matching.");
+
       return;
     }
 
     if (resumeFiles.length === 0) {
       setError("Please upload at least one resume file.");
+
       return;
     }
 
@@ -244,14 +248,16 @@ export default function ATSBulkUpload({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
+    if (score >= 80) { return "text-green-600"; }
+    if (score >= 60) { return "text-yellow-600"; }
+
     return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
-    if (score >= 60) return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
+    if (score >= 80) { return <Badge className="bg-green-100 text-green-800">Excellent</Badge>; }
+    if (score >= 60) { return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>; }
+
     return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
@@ -269,7 +275,7 @@ export default function ATSBulkUpload({
             Bulk Upload: {interview.name}
           </CardTitle>
           <CardDescription>
-            Upload multiple resumes to analyze against this interview's job description
+            Upload multiple resumes to analyze against this interview&apos;s job description
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -373,9 +379,9 @@ export default function ATSBulkUpload({
       {/* Action Buttons */}
       <div className="flex gap-3">
         <Button
-          onClick={handleBulkAnalyze}
           disabled={isLoading || resumeFiles.length === 0 || !interview.job_description}
           className="flex items-center gap-2"
+          onClick={handleBulkAnalyze}
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -387,8 +393,8 @@ export default function ATSBulkUpload({
 
         <Button
           variant="outline"
-          onClick={clearFiles}
           disabled={isLoading}
+          onClick={clearFiles}
         >
           Clear All
         </Button>

@@ -67,7 +67,8 @@ export default function ATSResumeMatcher() {
   const handleMatch = async () => {
     if (!jdFile || resumeFiles.length === 0) {
       setError("Please upload both a job description and at least one resume.");
-      return;
+      
+return;
     }
 
     setIsLoading(true);
@@ -202,9 +203,9 @@ export default function ATSResumeMatcher() {
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
-              onClick={handleMatch}
               disabled={isLoading || !jdFile || resumeFiles.length === 0 || !serverStatus}
               className="flex items-center gap-2"
+              onClick={handleMatch}
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

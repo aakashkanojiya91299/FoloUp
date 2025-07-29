@@ -35,7 +35,7 @@ export class ATSService {
 
   constructor() {
     // Use environment variable or default to local ATS server
-    this.baseUrl = process.env.ATS_SERVER_URL || "http://localhost:4000/api";
+    this.baseUrl = process.env.NEXT_PUBLIC_ATS_URL || process.env.ATS_SERVER_URL || "http://localhost:4000/api";
   }
 
   /**
@@ -197,7 +197,8 @@ export class ATSService {
   async getHealthStatus(): Promise<boolean> {
     try {
       await axios.get(`${this.baseUrl.replace("/api", "")}/health`);
-      return true;
+      
+return true;
     } catch (error) {
       return false;
     }

@@ -179,7 +179,8 @@ export async function POST(request: NextRequest) {
 
     if (saveError) {
       console.error('Database error:', saveError);
-      return NextResponse.json(
+      
+return NextResponse.json(
         { error: `Failed to save analysis: ${saveError.message}` },
         { status: 500 }
       );
@@ -199,7 +200,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('ATS Analysis error:', error);
-    return NextResponse.json(
+    
+return NextResponse.json(
       { error: 'Failed to analyze resume' },
       { status: 500 }
     );

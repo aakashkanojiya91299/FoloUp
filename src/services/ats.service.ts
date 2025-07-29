@@ -258,7 +258,8 @@ export class ATSService {
     if (years > 0) {
       return `${years}+ years of experience in ${skills.slice(0, 3).join(', ')}`;
     }
-    return 'Experience details available in resume';
+    
+return 'Experience details available in resume';
   }
 
   // Generate education summary
@@ -268,7 +269,8 @@ export class ATSService {
     if (education.length > 0) {
       return education.join(', ');
     }
-    return 'Education details available in resume';
+    
+return 'Education details available in resume';
   }
 
   // Generate recommendations based on job requirements

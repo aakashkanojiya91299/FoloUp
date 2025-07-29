@@ -39,7 +39,8 @@ function FileUpload({
           position: "bottom-right",
           duration: 3000,
         });
-        return;
+        
+return;
       }
       setFileName(file.name);
       if (file.size > 10 * 1024 * 1024) {

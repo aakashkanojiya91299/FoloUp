@@ -43,13 +43,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error creating candidate:", error);
-        return null;
+        
+return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error creating candidate:", error);
-      return null;
+      
+return null;
     }
   },
 
@@ -66,13 +68,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error fetching candidates:", error);
-        return [];
+        
+return [];
       }
 
       return data || [];
     } catch (error) {
       console.error("Error fetching candidates:", error);
-      return [];
+      
+return [];
     }
   },
 
@@ -89,13 +93,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error fetching candidates:", error);
-        return [];
+        
+return [];
       }
 
       return data || [];
     } catch (error) {
       console.error("Error fetching candidates:", error);
-      return [];
+      
+return [];
     }
   },
 
@@ -112,13 +118,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error fetching candidate:", error);
-        return null;
+        
+return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error fetching candidate:", error);
-      return null;
+      
+return null;
     }
   },
 
@@ -136,13 +144,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error updating candidate:", error);
-        return null;
+        
+return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error updating candidate:", error);
-      return null;
+      
+return null;
     }
   },
 
@@ -158,13 +168,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error deleting candidate:", error);
-        return false;
+        
+return false;
       }
 
       return true;
     } catch (error) {
       console.error("Error deleting candidate:", error);
-      return false;
+      
+return false;
     }
   },
 }; 

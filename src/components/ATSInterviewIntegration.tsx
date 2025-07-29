@@ -91,7 +91,8 @@ export default function ATSInterviewIntegration({
   const handleAnalyzeResume = async (resumeFile: File, candidateInfo: any) => {
     if (!interview.job_description) {
       setError("No job description found for this interview. Please add a job description first.");
-      return;
+      
+return;
     }
 
     setIsLoading(true);
@@ -170,20 +171,22 @@ export default function ATSInterviewIntegration({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) {return "text-green-600";}
+    if (score >= 60) {return "text-yellow-600";}
+    
+return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
-    if (score >= 60) return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
-    return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
+    if (score >= 80) {return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;}
+    if (score >= 60) {return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;}
+    
+return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
   // Load existing candidates from database
   const loadCandidates = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id) {return;}
     
     try {
       const dbCandidates = await CandidateService.getCandidatesByInterview(interview.id);
@@ -310,9 +313,9 @@ export default function ATSInterviewIntegration({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleAnalyzeResume(file, { name: "", email: "", phone: "" })}
                             disabled={isLoading}
                             className="flex items-center gap-2"
+                            onClick={() => handleAnalyzeResume(file, { name: "", email: "", phone: "" })}
                           >
                             {isLoading ? (
                               <Loader2 className="h-3 w-3 animate-spin" />

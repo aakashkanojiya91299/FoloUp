@@ -162,7 +162,8 @@ return this.gemini;
 
       try {
         console.log(`🔄 AI Service: Attempting fallback with ${fallbackProvider}...`);
-        return await this.createCompletion(request, fallbackProvider);
+        
+return await this.createCompletion(request, fallbackProvider);
       } catch (fallbackError: any) {
         console.error(`❌ AI Service: Fallback ${fallbackProvider} also failed:`, fallbackError.message);
 

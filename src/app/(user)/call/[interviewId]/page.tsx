@@ -22,72 +22,85 @@ type PopupProps = {
 
 function PopupLoader() {
   return (
-    <div className="bg-white rounded-md absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 md:w-[80%] w-[90%]">
-      <div className="h-[88vh] justify-center items-center rounded-lg border-2 border-b-4 border-r-4 border-black font-bold transition-all md:block dark:border-white">
-        <div className="relative flex flex-col items-center justify-center h-full">
-          <LoaderWithText />
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/50 max-w-4xl w-full h-[80vh] overflow-hidden">
+        <div className="h-full flex flex-col items-center justify-center p-8">
+          <div className="mb-8">
+            <LoaderWithText />
+          </div>
+          <div className="text-center text-gray-600 text-sm">
+            Preparing your interview experience...
+          </div>
+        </div>
+        <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+          <a
+            className="flex flex-row justify-center items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+            href="https://stspl.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="text-center text-sm font-medium">
+              Powered by{" "}
+              <span className="font-bold flex items-center gap-1">
+                <Image
+                  src="/sts-logo.svg"
+                  alt="STS Logo"
+                  width={60}
+                  height={20}
+                  className="h-4 w-auto"
+                />
+              </span>
+            </div>
+            <ArrowUpRightSquareIcon className="h-4 w-4 transition-transform duration-200 hover:scale-110" />
+          </a>
         </div>
       </div>
-      <a
-        className="flex flex-row justify-center align-middle mt-3"
-        href="https://stspl.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
-          <span className="font-bold flex items-center gap-1">
-            <Image
-              src="/sts-logo.svg"
-              alt="STS Logo"
-              width={60}
-              height={20}
-              className="h-4 w-auto"
-            />
-          </span>
-        </div>
-        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-[#06546e]" />
-      </a>
     </div>
   );
 }
 
 function PopUpMessage({ title, description, image }: PopupProps) {
   return (
-    <div className="bg-white rounded-md absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 md:w-[80%] w-[90%]">
-      <div className="h-[88vh] content-center rounded-lg border-2 border-b-4 border-r-4 border-black font-bold transition-all  md:block dark:border-white ">
-        <div className="flex flex-col items-center justify-center my-auto">
-          <Image
-            src={image}
-            alt="Graphic"
-            width={200}
-            height={200}
-            className="mb-4"
-          />
-          <h1 className="text-md font-medium mb-2">{title}</h1>
-          <p>{description}</p>
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/50 max-w-4xl w-full h-[80vh] overflow-hidden">
+        <div className="h-full flex flex-col items-center justify-center p-8">
+          <div className="mb-8 transform hover:scale-105 transition-transform duration-300">
+            <Image
+              src={image}
+              alt="Graphic"
+              width={200}
+              height={200}
+              className="drop-shadow-lg"
+            />
+          </div>
+          <div className="text-center space-y-4">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">{title}</h1>
+            <p className="text-gray-600 text-lg leading-relaxed max-w-md">{description}</p>
+          </div>
+        </div>
+        <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+          <a
+            className="flex flex-row justify-center items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+            href="https://stspl.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <div className="text-center text-sm font-medium">
+              Powered by{" "}
+              <span className="font-bold flex items-center gap-1">
+                <Image
+                  src="/sts-logo.svg"
+                  alt="STS Logo"
+                  width={60}
+                  height={20}
+                  className="h-4 w-auto"
+                />
+              </span>
+            </div>
+            <ArrowUpRightSquareIcon className="h-4 w-4 transition-transform duration-200 hover:scale-110" />
+          </a>
         </div>
       </div>
-      <a
-        className="flex flex-row justify-center align-middle mt-3"
-        href="https://stspl.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
-          <span className="font-bold flex items-center gap-1">
-            <Image
-              src="/sts-logo.svg"
-              alt="STS Logo"
-              width={60}
-              height={20}
-              className="h-4 w-auto"
-            />
-          </span>
-        </div>
-        <ArrowUpRightSquareIcon className="h-[1.5rem] w-[1.5rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-[#06546e]" />
-      </a>
     </div>
   );
 }
@@ -97,6 +110,7 @@ function InterviewInterface({ params }: Props) {
   const [isActive, setIsActive] = useState(true);
   const { getInterviewById } = useInterviews();
   const [interviewNotFound, setInterviewNotFound] = useState(false);
+
   useEffect(() => {
     if (interview) {
       setIsActive(interview?.is_active === true);
@@ -124,50 +138,89 @@ function InterviewInterface({ params }: Props) {
   }, []);
 
   return (
-    <div>
-      <div className="hidden md:block p-8 mx-auto form-container">
-        {!interview ? (
-          interviewNotFound ? (
-            <PopUpMessage
-              title="Invalid URL"
-              description="The interview link you're trying to access is invalid. Please check the URL and try again."
-              image="/invalid-url.png"
-            />
-          ) : (
-            <PopupLoader />
-          )
-        ) : !isActive ? (
-          <PopUpMessage
-            title="Interview Is Unavailable"
-            description="We are not currently accepting responses. Please contact the sender for more information."
-            image="/closed.png"
-          />
-        ) : (
-          <Call interview={interview} />
-        )}
-      </div>
-      <div className=" md:hidden flex flex-col items-center md:h-[0px] justify-center  my-auto">
-        <div className="mt-48 px-3">
-          <p className="text-center my-5 text-md font-semibold">
-            {interview?.name}
-          </p>
-          <p className="text-center text-gray-600 my-5">
-            Please use a PC to respond to the interview. Apologies for any
-            inconvenience caused.{" "}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <div className="container mx-auto">
+          <div className="max-w-6xl mx-auto">
+            {!interview ? (
+              interviewNotFound ? (
+                <PopUpMessage
+                  title="Invalid URL"
+                  description="The interview link you're trying to access is invalid. Please check the URL and try again."
+                  image="/invalid-url.png"
+                />
+              ) : (
+                <PopupLoader />
+              )
+            ) : !isActive ? (
+              <PopUpMessage
+                title="Interview Is Unavailable"
+                description="We are not currently accepting responses. Please contact the sender for more information."
+                image="/closed.png"
+              />
+            ) : (
+                  <div>
+                    <Call interview={interview} />
+                  </div>
+            )}
+          </div>
         </div>
-        <div className="text-center text-md font-semibold mr-2">
-          Powered by{" "}
-          <span className="font-bold flex items-center gap-1">
+      </div>
+
+      {/* Mobile View */}
+      <div className="md:hidden min-h-screen flex flex-col items-center justify-center p-6">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 p-8 max-w-sm w-full text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              {interview?.name || "Interview"}
+            </h2>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Please use a desktop computer to respond to this interview.
+              This ensures the best experience with all features available.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-center text-sm text-gray-500">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Secure & Professional
+            </div>
+            <div className="flex items-center justify-center text-sm text-gray-500">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Optimized for Desktop
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-center items-center">
+          <a
+            href="https://stspl.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-all duration-300 px-4 py-2 rounded-xl hover:bg-white/80 hover:shadow-lg border border-transparent hover:border-gray-200"
+          >
+            <span className="text-sm font-medium">Powered by</span>
             <Image
               src="/sts-logo.svg"
               alt="STS Logo"
               width={60}
               height={20}
-              className="h-4 w-auto"
+              className="h-5 w-auto"
             />
-          </span>
+            <ArrowUpRightSquareIcon className="h-4 w-4 transition-all duration-300 hover:scale-110 hover:rotate-12" />
+          </a>
         </div>
+
       </div>
     </div>
   );

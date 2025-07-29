@@ -76,7 +76,7 @@ export default function ATSCandidatesPage() {
   }, [selectedInterview]);
 
   const loadInterviews = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id) {return;}
     
     setLoading(true);
     try {
@@ -93,7 +93,7 @@ export default function ATSCandidatesPage() {
   };
 
   const loadCandidates = async () => {
-    if (!selectedInterview?.id || !organization?.id) return;
+    if (!selectedInterview?.id || !organization?.id) {return;}
 
     setLoading(true);
     try {
@@ -140,15 +140,17 @@ export default function ATSCandidatesPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
-    return "text-red-600";
+    if (score >= 80) {return "text-green-600";}
+    if (score >= 60) {return "text-yellow-600";}
+    
+return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
-    if (score >= 60) return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
-    return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
+    if (score >= 80) {return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;}
+    if (score >= 60) {return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;}
+    
+return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
   const filteredCandidates = candidates.filter(
@@ -159,13 +161,15 @@ export default function ATSCandidatesPage() {
   const sortedCandidates = [...filteredCandidates].sort((a, b) => {
     const scoreA = a.atsResult?.match_score || 0;
     const scoreB = b.atsResult?.match_score || 0;
-    return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+    
+return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
   });
 
   const averageScore = filteredCandidates.length > 0 
     ? filteredCandidates.reduce((sum, candidate) => {
       const score = candidate.atsResult?.match_score || 0;
-      return sum + score;
+      
+return sum + score;
     }, 0) / filteredCandidates.length
     : 0;
 
@@ -317,8 +321,8 @@ export default function ATSCandidatesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                           className="h-6 w-6 p-0"
+                          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
                         >
                           {sortOrder === 'desc' ? '↓' : '↑'}
                         </Button>
