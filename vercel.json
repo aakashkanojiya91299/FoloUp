@@ -1,34 +1,44 @@
 {
-    "buildCommand": "npm run build",
-    "outputDirectory": ".next",
-    "framework": "nextjs",
-    "installCommand": "npm install",
-    "devCommand": "npm run dev",
-    "functions": {
-        "app/api/**/*.ts": {
-            "maxDuration": 30
-        },
-        "app/api/ats/**/*.ts": {
-            "maxDuration": 60
-        }
+"buildCommand": "npm run setup:all && npm run build",
+"outputDirectory": ".next",
+"framework": "nextjs",
+"installCommand": "npm install",
+"devCommand": "npm run dev:all",
+"functions": {
+    "app/api/**/*.ts": {
+        "maxDuration": 30
     },
-    "headers": [
-        {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "X-Content-Type-Options",
-                    "value": "nosniff"
-                },
-                {
-                    "key": "X-Frame-Options",
-                    "value": "DENY"
-                },
-                {
-                    "key": "X-XSS-Protection",
-                    "value": "1; mode=block"
-                }
-            ]
-        }
-    ]
+    "app/api/ats/**/*.ts": {
+        "maxDuration": 60
+    }
+},
+"rewrites": [
+    {
+        "source": "/api/ats/(.*)",
+        "destination": "/api/ats-proxy/$1"
+    },
+    {
+        "source": "/health",
+        "destination": "/api/ats-proxy/health"
+    }
+],
+"headers": [
+    {
+        "source": "/(.*)",
+        "headers": [
+            {
+                "key": "X-Content-Type-Options",
+                "value": "nosniff"
+            },
+            {
+                "key": "X-Frame-Options",
+                "value": "DENY"
+            },
+            {
+                "key": "X-XSS-Protection",
+                "value": "1; mode=block"
+            }
+        ]
+    }
+]
 }
