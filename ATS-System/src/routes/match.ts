@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import path from "path";
-import { matchResumeToJD } from "../services/openaiService";
+import { matchResumeToJD, extractContactInfo } from "../services/openaiService";
 import { parsePdfOrDoc } from "../utils/pdfParser"; // Handles PDF & DOCX
 
 const router = express.Router();
@@ -140,6 +140,87 @@ router.post(
       return res
         .status(500)
         .send({ error: "Failed to process resume", details: err.message });
+    }
+  }
+);
+
+// New endpoint for bulk matching with job description text
+router.post(
+  "/match/text/bulk",
+  upload.array("resumes", 10), // Allow up to 10 resumes
+  async (req: Request, res: Response) => {
+    try {
+      const resumeFiles = req.files as Express.Multer.File[];
+      const { jobDescription } = req.body;
+
+      // Debug logging
+      console.log("Received bulk request:", {
+        filesCount: resumeFiles?.length || 0,
+        hasJobDescription: !!jobDescription,
+        jobDescriptionLength: jobDescription?.length || 0,
+        bodyKeys: Object.keys(req.body)
+      });
+
+      if (!resumeFiles || resumeFiles.length === 0 || !jobDescription) {
+        return res
+          .status(400)
+          .json({ error: "Both resume files and job description are required" });
+      }
+
+      const results = await Promise.all(
+        resumeFiles.map(async (resume) => {
+          try {
+            const resumeText = await parsePdfOrDoc(resume.path);
+            const match = await matchResumeToJD(jobDescription, resumeText);
+            return {
+              file: resume.originalname,
+              result: match,
+            };
+          } catch (err) {
+            return {
+              file: resume.originalname,
+              error: "Failed to parse or match resume",
+            };
+          }
+        })
+      );
+
+      return res.json({
+        jobDescription: jobDescription.substring(0, 100) + "...",
+        results
+      });
+    } catch (err: any) {
+      console.error("Error processing bulk resumes with text JD:", err);
+      return res
+        .status(500)
+        .send({ error: "Failed to process resumes", details: err.message });
+    }
+  }
+);
+
+// New endpoint for extracting contact information from resume
+router.post(
+  "/extract-contact",
+  upload.single("resume"),
+  async (req: Request, res: Response) => {
+    try {
+      const resumeFile = req.file;
+
+      if (!resumeFile) {
+        return res
+          .status(400)
+          .json({ error: "Resume file is required" });
+      }
+
+      const resumeText = await parsePdfOrDoc(resumeFile.path);
+      const contactInfo = await extractContactInfo(resumeText);
+
+      return res.send(contactInfo);
+    } catch (err: any) {
+      console.error("Error extracting contact info:", err);
+      return res
+        .status(500)
+        .send({ error: "Failed to extract contact information", details: err.message });
     }
   }
 );

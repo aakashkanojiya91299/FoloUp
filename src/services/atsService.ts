@@ -15,6 +15,21 @@ export interface ATSMultipleMatchResult {
   }>;
 }
 
+export interface ATSBulkMatchResult {
+  jobDescription: string;
+  results: Array<{
+    file: string;
+    result?: ATSMatchResult;
+    error?: string;
+  }>;
+}
+
+export interface ContactInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 export class ATSService {
   private baseUrl: string;
 
@@ -107,6 +122,71 @@ export class ATSService {
       console.error("ATS Service Error:", error);
       throw new Error(
         error.response?.data?.error || "Failed to match resumes to JD"
+      );
+    }
+  }
+
+  /**
+   * Match multiple resumes against job description text (bulk upload)
+   */
+  async matchMultipleResumesToJDText(
+    resumeFiles: File[],
+    jobDescriptionText: string
+  ): Promise<ATSBulkMatchResult> {
+    const formData = new FormData();
+
+    resumeFiles.forEach((file) => {
+      formData.append("resumes", file);
+    });
+    formData.append("jobDescription", jobDescriptionText);
+
+    // Debug logging
+    console.log("Sending bulk request with:", {
+      fileCount: resumeFiles.length,
+      jobDescriptionLength: jobDescriptionText.length,
+      jobDescriptionPreview: jobDescriptionText.substring(0, 100)
+    });
+
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/match/text/bulk`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error("ATS Service Error:", error);
+      console.error("Error response:", error.response?.data);
+      throw new Error(
+        error.response?.data?.error || "Failed to match resumes to JD"
+      );
+    }
+  }
+
+  /**
+   * Extract contact information from resume
+   */
+  async extractContactInfo(resumeFile: File): Promise<ContactInfo> {
+    const formData = new FormData();
+    formData.append("resume", resumeFile);
+
+    try {
+      const response = await axios.post(`${this.baseUrl}/extract-contact`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      return response.data;
+    } catch (error: any) {
+      console.error("ATS Service Error:", error);
+      throw new Error(
+        error.response?.data?.error || "Failed to extract contact information"
       );
     }
   }

@@ -9,15 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
+
 import { 
   Loader2, 
   Upload, 
@@ -28,7 +21,6 @@ import {
   Mail, 
   Phone,
   Star,
-  Plus,
   Users
 } from "lucide-react";
 import { useOrganization } from "@clerk/nextjs";
@@ -69,13 +61,7 @@ export default function ATSInterviewIntegration({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [serverStatus, setServerStatus] = useState<boolean | null>(null);
-  const [isAddCandidateOpen, setIsAddCandidateOpen] = useState(false);
-  const [currentCandidate, setCurrentCandidate] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    resumeFile: null as File | null,
-  });
+
 
   const onResumeDrop = useDropzone({
     accept: {
@@ -112,6 +98,21 @@ export default function ATSInterviewIntegration({
     setError(null);
 
     try {
+      // First extract contact information from resume
+      const contactInfo = await atsService.extractContactInfo(resumeFile);
+
+      // Check if essential contact info is available
+      if (!contactInfo.name || !contactInfo.email) {
+        throw new Error("Could not extract name and email from resume. Please ensure the resume contains clear contact information.");
+      }
+
+      // Use extracted contact info instead of manually entered info
+      const finalCandidateInfo = {
+        name: contactInfo.name,
+        email: contactInfo.email,
+        phone: contactInfo.phone || candidateInfo.phone || "",
+      };
+
       const result = await atsService.matchResumeToJDText(resumeFile, interview.job_description);
       
       if ('error' in result) {
@@ -120,9 +121,9 @@ export default function ATSInterviewIntegration({
 
       // Save candidate to database
       const dbCandidate: DBCandidate = {
-        name: candidateInfo.name,
-        email: candidateInfo.email,
-        phone: candidateInfo.phone,
+        name: finalCandidateInfo.name,
+        email: finalCandidateInfo.email,
+        phone: finalCandidateInfo.phone,
         interview_id: interview.id,
         organization_id: organization?.id || "",
         resume_filename: resumeFile.name,
@@ -137,9 +138,9 @@ export default function ATSInterviewIntegration({
         // Add to local state for UI
         const candidate: Candidate = {
           id: savedCandidate.id || `candidate_${Date.now()}`,
-          name: candidateInfo.name,
-          email: candidateInfo.email,
-          phone: candidateInfo.phone,
+          name: finalCandidateInfo.name,
+          email: finalCandidateInfo.email,
+          phone: finalCandidateInfo.phone,
           resumeFile: resumeFile,
           atsResult: result,
           createdAt: new Date(),
@@ -153,9 +154,6 @@ export default function ATSInterviewIntegration({
       
       // Remove the processed file
       setResumeFiles(prev => prev.filter(f => f !== resumeFile));
-      
-      setIsAddCandidateOpen(false);
-      setCurrentCandidate({ name: "", email: "", phone: "", resumeFile: null });
 
     } catch (err: any) {
       setError(err.message || "Failed to analyze resume");
@@ -164,14 +162,7 @@ export default function ATSInterviewIntegration({
     }
   };
 
-  const handleAddCandidate = async () => {
-    if (!currentCandidate.name || !currentCandidate.email || !currentCandidate.resumeFile) {
-      setError("Please fill in all required fields and upload a resume.");
-      return;
-    }
 
-    await handleAnalyzeResume(currentCandidate.resumeFile, currentCandidate);
-  };
 
   const clearFiles = () => {
     setResumeFiles([]);
@@ -272,90 +263,16 @@ export default function ATSInterviewIntegration({
         )}
       </div>
 
-      {/* Add Candidate */}
+      {/* Resume Upload */}
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Add Candidate
-            </CardTitle>
-            <Dialog open={isAddCandidateOpen} onOpenChange={setIsAddCandidateOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Candidate
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Candidate</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Name *</Label>
-                    <Input
-                      id="name"
-                      value={currentCandidate.name}
-                      onChange={(e) => setCurrentCandidate({ ...currentCandidate, name: e.target.value })}
-                      placeholder="Enter candidate name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={currentCandidate.email}
-                      onChange={(e) => setCurrentCandidate({ ...currentCandidate, email: e.target.value })}
-                      placeholder="Enter candidate email"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone (Optional)</Label>
-                    <Input
-                      id="phone"
-                      value={currentCandidate.phone}
-                      onChange={(e) => setCurrentCandidate({ ...currentCandidate, phone: e.target.value })}
-                      placeholder="Enter candidate phone"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="resume">Resume File *</Label>
-                    <Input
-                      id="resume"
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => setCurrentCandidate({ 
-                        ...currentCandidate, 
-                        resumeFile: e.target.files?.[0] || null 
-                      })}
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Supported formats: PDF, DOC, DOCX
-                    </p>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => setIsAddCandidateOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleAddCandidate}
-                      disabled={isLoading || !currentCandidate.name || !currentCandidate.email || !currentCandidate.resumeFile}
-                      className="flex items-center gap-2"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Star className="h-4 w-4" />
-                      )}
-                      {isLoading ? "Analyzing..." : "Add & Analyze"}
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Upload Resume
+          </CardTitle>
+          <CardDescription>
+            Upload a resume to automatically extract contact information and analyze against the job description
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!interview.job_description ? (
@@ -365,8 +282,50 @@ export default function ATSInterviewIntegration({
               </AlertDescription>
             </Alert>
           ) : (
-            <div className="text-sm text-gray-600">
-              Upload candidate resumes to get AI-powered matching scores against the job description.
+            <div className="space-y-4">
+                <div
+                  {...onResumeDrop.getRootProps()}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${onResumeDrop.isDragActive
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300 hover:border-gray-400"
+                    }`}
+                >
+                  <input {...onResumeDrop.getInputProps()} />
+                  <div className="flex flex-col items-center gap-2">
+                    <Upload className="h-8 w-8 text-gray-400" />
+                    <p className="text-sm text-gray-600">
+                      Drop resume here, or click to select
+                    </p>
+                    <p className="text-xs text-gray-500">PDF, DOC, or DOCX</p>
+                  </div>
+                </div>
+
+                {resumeFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Selected Files:</h4>
+                    <div className="space-y-2">
+                      {resumeFiles.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <span className="text-sm">{file.name}</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAnalyzeResume(file, { name: "", email: "", phone: "" })}
+                            disabled={isLoading}
+                            className="flex items-center gap-2"
+                          >
+                            {isLoading ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Star className="h-3 w-3" />
+                            )}
+                            Analyze
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
         </CardContent>
@@ -453,62 +412,7 @@ export default function ATSInterviewIntegration({
         </Card>
       )}
 
-      {/* Resume Upload Area */}
-      {interview.job_description && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Bulk Resume Upload
-            </CardTitle>
-            <CardDescription>
-              Upload multiple resumes to analyze against the job description
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div
-              {...onResumeDrop.getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                onResumeDrop.isDragActive
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-            >
-              <input {...onResumeDrop.getInputProps()} />
-              <div className="flex flex-col items-center gap-2">
-                <Upload className="h-8 w-8 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  Drop resumes here, or click to select
-                </p>
-                <p className="text-xs text-gray-500">PDF, DOC, or DOCX</p>
-              </div>
-            </div>
-            
-            {resumeFiles.length > 0 && (
-              <div className="mt-4">
-                <Label className="text-sm font-medium">Uploaded Files:</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {resumeFiles.map((file, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      {file.name}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex gap-2 mt-3">
-                  <Button 
-                    onClick={clearFiles}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Clear All
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+
     </div>
   );
 } 

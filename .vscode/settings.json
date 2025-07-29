@@ -22,7 +22,7 @@
     "editor.tabSize": 2
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "prettier.configPath": ".prettierrc.js",
   "eslint.workingDirectories": [

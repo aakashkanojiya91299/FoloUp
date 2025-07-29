@@ -1,5 +1,6 @@
 import { OpenAI } from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios";
 import {
   SYSTEM_PROMPT,
   generateQuestionsPrompt,
@@ -164,8 +165,16 @@ return this.gemini;
         return await this.createCompletion(request, fallbackProvider);
       } catch (fallbackError: any) {
         console.error(`❌ AI Service: Fallback ${fallbackProvider} also failed:`, fallbackError.message);
-        // If both providers fail, throw the original error
-        throw error;
+
+        // If both providers fail, try direct API call as last resort
+        console.log(`🔄 AI Service: Both providers failed, trying direct API call...`);
+        try {
+          return await this.createDirectAPICall(request, fallbackProvider);
+        } catch (apiError: any) {
+          console.error(`❌ AI Service: Direct API call also failed:`, apiError.message);
+          // If all methods fail, throw the original error
+          throw error;
+        }
       }
     }
   }
@@ -319,6 +328,103 @@ return this.gemini;
       console.error('❌ Gemini Debug: Error in createGeminiCompletion:', error);
       console.error('❌ Gemini Debug: Error message:', error.message);
       console.error('❌ Gemini Debug: Error stack:', error.stack);
+      throw error;
+    }
+  }
+
+  private async createDirectAPICall(
+    request: AICompletionRequest,
+    provider: AIProvider,
+  ): Promise<AICompletionResponse> {
+    console.log(`🔄 AI Service: Creating direct API call for ${provider}...`);
+
+    try {
+      if (provider === "gemini") {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+          throw new Error("Gemini API key not found");
+        }
+
+        // Convert OpenAI format to Gemini format
+        const prompt = request.messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+
+        const response = await axios.post(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+          {
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "X-goog-api-key": apiKey,
+            },
+          }
+        );
+
+        const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+        if (!text) {
+          throw new Error("No content returned from Gemini API");
+        }
+
+        return {
+          content: text,
+          usage: {
+            promptTokens: response.data.usageMetadata?.promptTokenCount,
+            completionTokens: response.data.usageMetadata?.candidatesTokenCount,
+            totalTokens: response.data.usageMetadata?.totalTokenCount,
+          },
+        };
+      } else if (provider === "openai") {
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+          throw new Error("OpenAI API key not found");
+        }
+
+        const response = await axios.post(
+          "https://api.openai.com/v1/chat/completions",
+          {
+            model: request.model,
+            messages: request.messages,
+            response_format: request.responseFormat,
+            temperature: request.temperature,
+            max_tokens: request.maxTokens,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
+            },
+          }
+        );
+
+        const choice = response.data.choices[0];
+        if (!choice?.message?.content) {
+          throw new Error("No content returned from OpenAI API");
+        }
+
+        return {
+          content: choice.message.content,
+          usage: response.data.usage
+            ? {
+              promptTokens: response.data.usage.prompt_tokens,
+              completionTokens: response.data.usage.completion_tokens,
+              totalTokens: response.data.usage.total_tokens,
+            }
+            : undefined,
+        };
+      } else {
+        throw new Error(`Unsupported provider for direct API call: ${provider}`);
+      }
+    } catch (error: any) {
+      console.error(`❌ AI Service: Direct API call failed:`, error.message);
       throw error;
     }
   }
