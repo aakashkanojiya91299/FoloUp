@@ -102,17 +102,17 @@ return;
       // First extract contact information from resume
       const contactInfo = await atsService.extractContactInfo(resumeFile);
 
-      // Check if essential contact info is available
-      if (!contactInfo.name || !contactInfo.email) {
-        throw new Error("Could not extract name and email from resume. Please ensure the resume contains clear contact information.");
-      }
-
-      // Use extracted contact info instead of manually entered info
+      // Use extracted contact info with fallback to filename
       const finalCandidateInfo = {
-        name: contactInfo.name,
-        email: contactInfo.email,
-        phone: contactInfo.phone || candidateInfo.phone || "",
+        name: (contactInfo.name && contactInfo.name !== "not found") ? contactInfo.name : getCleanFileName(resumeFile.name),
+        email: (contactInfo.email && contactInfo.email !== "not found") ? contactInfo.email : `candidate-${Date.now()}@example.com`,
+        phone: (contactInfo.phone && contactInfo.phone !== "not found") ? contactInfo.phone : (candidateInfo.phone || ""),
       };
+
+      // Check if we have at least a name (either extracted or from filename)
+      if (!finalCandidateInfo.name) {
+        throw new Error("Could not extract name from resume and filename is not available.");
+      }
 
       const result = await atsService.matchResumeToJDText(resumeFile, interview.job_description);
       
@@ -149,6 +149,9 @@ return;
 
         setCandidates(prev => [...prev, candidate]);
         onCandidateCreated?.(candidate);
+
+        // Reload candidates to ensure data consistency
+        await loadCandidates();
       } else {
         throw new Error("Failed to save candidate to database");
       }
@@ -182,6 +185,17 @@ return "text-red-600";
     if (score >= 60) {return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;}
     
 return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
+  };
+
+  const getCleanFileName = (filename: string) => {
+    return filename.replace(/\.[^/.]+$/, "");
+  };
+
+  const getDisplayName = (candidateName: string | undefined, filename: string) => {
+    if (candidateName && candidateName !== "not found") {
+      return candidateName;
+    }
+    return getCleanFileName(filename);
   };
 
   // Load existing candidates from database
@@ -359,18 +373,31 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
                       <div className="flex items-center gap-3 mb-2">
                         <User className="h-5 w-5 text-gray-500" />
                         <div>
-                          <h4 className="font-semibold">{candidate.name}</h4>
+                          <h4 className="font-semibold">
+                            {candidate.name}
+                            {candidate.name === getCleanFileName(candidate.resumeFile.name) && (
+                              <span className="text-xs text-gray-500 ml-2">(from filename)</span>
+                            )}
+                          </h4>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
                               <Mail className="h-4 w-4" />
-                              {candidate.email}
+                              {candidate.email === "not found" ? (
+                                <span className="text-red-500">Email: Not Found</span>
+                              ) : candidate.email.includes("candidate-") ? (
+                                <span className="text-yellow-600">Email: Generated</span>
+                              ) : (
+                                candidate.email
+                              )}
                             </span>
-                            {candidate.phone && (
-                              <span className="flex items-center gap-1">
-                                <Phone className="h-4 w-4" />
-                                {candidate.phone}
-                              </span>
-                            )}
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-4 w-4" />
+                              {candidate.phone && candidate.phone !== "not found" ? (
+                                candidate.phone
+                              ) : (
+                                <span className="text-red-500">Phone: Not Found</span>
+                              )}
+                            </span>
                           </div>
                         </div>
                       </div>

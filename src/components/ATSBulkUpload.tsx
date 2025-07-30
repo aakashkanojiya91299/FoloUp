@@ -27,6 +27,7 @@ interface FileWithPreview {
 
 interface BulkUploadResult {
   file: string;
+  candidateName?: string; // Add candidate name field
   result?: {
     match_score: number;
     missing_skills: string[];
@@ -58,6 +59,12 @@ export default function ATSBulkUpload({
   const [serverStatus, setServerStatus] = useState<boolean | null>(null);
   const [results, setResults] = useState<BulkUploadResult[]>([]);
   const [progress, setProgress] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+
+  // Handle hydration mismatch
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     console.log("🎯 onDrop called with files:", acceptedFiles);
@@ -181,28 +188,58 @@ export default function ATSBulkUpload({
         interview.job_description
       );
 
-      setResults(bulkResult.results);
+      // Extract contact info for each file and add candidate names to results
+      const resultsWithNames = await Promise.all(
+        bulkResult.results.map(async (result) => {
+          // Find the corresponding file to extract contact info
+          const resumeFileWithPreview = resumeFiles.find(
+            fileWithPreview => fileWithPreview?.file?.name === result.file
+          );
+
+          let candidateName = getCleanFileName(result.file); // Use filename as fallback
+
+          // Try to extract contact info from the resume
+          if (resumeFileWithPreview && !result.error) {
+            try {
+              const contactInfo = await atsService.extractContactInfo(resumeFileWithPreview.file);
+              if (contactInfo.name && contactInfo.name !== "not found" && contactInfo.name.trim() !== "") {
+                candidateName = contactInfo.name;
+              }
+            } catch (error) {
+              console.warn(`Could not extract contact info from ${result.file}:`, error);
+            }
+          }
+
+          return {
+            ...result,
+            candidateName
+          };
+        })
+      );
+
+      setResults(resultsWithNames);
       setProgress(100);
 
       // Save successful candidates to database
       const successfulCandidates = [];
-      for (const result of bulkResult.results) {
+      for (const result of resultsWithNames) {
         if (result.result && !result.error) {
           // Find the corresponding file to extract contact info
           const resumeFileWithPreview = resumeFiles.find(fileWithPreview => fileWithPreview?.file?.name === result.file);
 
-          let candidateName = result.file.replace(/\.[^/.]+$/, ""); // Use filename as fallback
+          let candidateName = getDisplayName(result.candidateName, result.file); // Use extracted name or filename as fallback
           let candidateEmail = `candidate-${Date.now()}@example.com`; // Generate placeholder email
           let candidatePhone = "";
 
-          // Try to extract contact info from the resume
+          // Try to extract contact info from the resume for email and phone
           if (resumeFileWithPreview) {
             try {
               const contactInfo = await atsService.extractContactInfo(resumeFileWithPreview.file);
-              if (contactInfo.name && contactInfo.email) {
-                candidateName = contactInfo.name;
+              if (contactInfo.email && contactInfo.email !== "not found") {
                 candidateEmail = contactInfo.email;
-                candidatePhone = contactInfo.phone || "";
+              }
+              if (contactInfo.phone && contactInfo.phone !== "not found") {
+                candidatePhone = contactInfo.phone;
               }
             } catch (error) {
               console.warn(`Could not extract contact info from ${result.file}:`, error);
@@ -229,6 +266,9 @@ export default function ATSBulkUpload({
       }
 
       onCandidatesCreated?.(successfulCandidates);
+
+      // Reload candidates to ensure data consistency
+      await loadCandidates();
 
       // Clear processed files
       setResumeFiles([]);
@@ -261,9 +301,66 @@ export default function ATSBulkUpload({
     return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
+  const getCleanFileName = (filename: string) => {
+    return filename.replace(/\.[^/.]+$/, "");
+  };
+
+  const getDisplayName = (candidateName: string | undefined, filename: string) => {
+    if (candidateName && candidateName !== "not found") {
+      return candidateName;
+    }
+    return getCleanFileName(filename);
+  };
+
+  // Load existing candidates from database
+  const loadCandidates = async () => {
+    if (!organization?.id || !interview?.id) { return; }
+
+    try {
+      const dbCandidates = await CandidateService.getCandidatesByInterview(interview.id);
+
+      // Convert database candidates to UI format for results display
+      const uiResults: BulkUploadResult[] = dbCandidates.map(dbCandidate => ({
+        file: dbCandidate.resume_filename || 'Unknown file',
+        candidateName: dbCandidate.name,
+        result: {
+          match_score: dbCandidate.ats_score,
+          missing_skills: dbCandidate.ats_missing_skills || [],
+          feedback: dbCandidate.ats_feedback || ''
+        }
+      }));
+
+      setResults(uiResults);
+    } catch (error) {
+      console.error("Error loading candidates:", error);
+    }
+  };
+
   React.useEffect(() => {
-    checkServerStatus();
-  }, []);
+    if (isClient) {
+      checkServerStatus();
+      loadCandidates();
+    }
+  }, [isClient, organization?.id, interview?.id]);
+
+  // Show loading state during hydration
+  if (!isClient) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Bulk Upload: {interview.name}
+            </CardTitle>
+            <CardDescription>
+              Loading...
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -297,22 +394,24 @@ export default function ATSBulkUpload({
       </Card>
 
       {/* Server Status */}
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">ATS Server Status:</span>
-        {serverStatus === null ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : serverStatus ? (
-          <div className="flex items-center gap-1 text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-sm">Connected</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 text-red-600">
-            <XCircle className="h-4 w-4" />
-            <span className="text-sm">Disconnected</span>
-          </div>
-        )}
-      </div>
+      {isClient && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium">ATS Server Status:</span>
+          {serverStatus === null ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : serverStatus ? (
+            <div className="flex items-center gap-1 text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm">Connected</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-red-600">
+              <XCircle className="h-4 w-4" />
+              <span className="text-sm">Disconnected</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* File Upload Area */}
       <Card>
@@ -326,36 +425,38 @@ export default function ATSBulkUpload({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div
-            {...getRootProps()}
-            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
-              ? "border-blue-400 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-              }`}
-          >
-            <input {...getInputProps()} />
-            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            {isDragActive ? (
-              <p className="text-blue-600">Drop the files here...</p>
-            ) : (
-              <div>
-                <p className="text-gray-600 mb-2">
-                  Drag & drop multiple resume files here, or click to select
-                </p>
-                <p className="text-sm text-gray-500">
-                  Supports PDF, DOC, DOCX files (up to 10 files)
-                </p>
-              </div>
-            )}
-          </div>
+          {isClient && (
+            <div
+              {...getRootProps()}
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
+                ? "border-blue-400 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
+                }`}
+            >
+              <input {...getInputProps()} />
+              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              {isDragActive ? (
+                <p className="text-blue-600">Drop the files here...</p>
+              ) : (
+                <div>
+                  <p className="text-gray-600 mb-2">
+                    Drag & drop multiple resume files here, or click to select
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Supports PDF, DOC, DOCX files (up to 10 files)
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* File List */}
-          {resumeFiles.length > 0 && (
+          {isClient && resumeFiles.length > 0 && (
             <div className="mt-4">
               <h4 className="font-medium mb-2">Selected Files ({resumeFiles.length})</h4>
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {resumeFiles.map((fileWithPreview, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div key={`${fileWithPreview?.file?.name}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <span className="text-sm truncate">{fileWithPreview?.file?.name || 'Unknown file'}</span>
                     <span className="text-xs text-gray-500">
                       {fileWithPreview?.file?.size ? (fileWithPreview.file.size / 1024 / 1024).toFixed(2) : '0'} MB
@@ -367,7 +468,7 @@ export default function ATSBulkUpload({
           )}
 
           {/* Debug Info */}
-          {process.env.NODE_ENV === 'development' && (
+          {isClient && process.env.NODE_ENV === 'development' && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
               <p>Debug: {resumeFiles.length} files in state</p>
               <p>Files: {resumeFiles.map(f => f?.file?.name || 'undefined').join(', ')}</p>
@@ -377,44 +478,46 @@ export default function ATSBulkUpload({
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button
-          disabled={isLoading || resumeFiles.length === 0 || !interview.job_description}
-          className="flex items-center gap-2"
-          onClick={handleBulkAnalyze}
-        >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Users className="h-4 w-4" />
-          )}
-          {isLoading ? "Analyzing..." : `Analyze ${resumeFiles.length} Resume${resumeFiles.length !== 1 ? 's' : ''}`}
-        </Button>
+      {isClient && (
+        <div className="flex gap-3">
+          <Button
+            disabled={isLoading || resumeFiles.length === 0 || !interview.job_description}
+            className="flex items-center gap-2"
+            onClick={handleBulkAnalyze}
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Users className="h-4 w-4" />
+            )}
+            {isLoading ? "Analyzing..." : `Analyze ${resumeFiles.length} Candidate${resumeFiles.length !== 1 ? 's' : ''}`}
+          </Button>
 
-        <Button
-          variant="outline"
-          disabled={isLoading}
-          onClick={clearFiles}
-        >
-          Clear All
-        </Button>
-
-        {/* Debug button for testing */}
-        {process.env.NODE_ENV === 'development' && (
           <Button
             variant="outline"
-            onClick={() => {
-              console.log("Current files:", resumeFiles);
-              console.log("Interview:", interview);
-            }}
+            disabled={isLoading}
+            onClick={clearFiles}
           >
-            Debug Info
+            Clear All
           </Button>
-        )}
-      </div>
+
+          {/* Debug button for testing */}
+          {process.env.NODE_ENV === 'development' && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log("Current files:", resumeFiles);
+                console.log("Interview:", interview);
+              }}
+            >
+              Debug Info
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Progress */}
-      {isLoading && (
+      {isClient && isLoading && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>Processing resumes...</span>
@@ -425,7 +528,7 @@ export default function ATSBulkUpload({
       )}
 
       {/* Error Display */}
-      {error && (
+      {isClient && error && (
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
@@ -433,20 +536,30 @@ export default function ATSBulkUpload({
       )}
 
       {/* Results */}
-      {results.length > 0 && (
+      {isClient && results.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Star className="h-5 w-5" />
-              Analysis Results ({results.length} files)
+              Analysis Results ({results.length} candidates)
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {results.map((result, index) => (
-                <div key={index} className="border rounded-lg p-4">
+                <div key={`${result.file}-${index}`} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="font-medium">{result.file}</h4>
+                    <div className="flex flex-col">
+                      <h4 className="font-medium">
+                        {getDisplayName(result.candidateName, result.file)}
+                      </h4>
+                      {result.candidateName && result.candidateName !== "not found" && result.candidateName !== getCleanFileName(result.file) && (
+                        <span className="text-sm text-gray-500">File: {result.file}</span>
+                      )}
+                      {result.candidateName === "not found" && (
+                        <span className="text-sm text-gray-500">Name: Not Found</span>
+                      )}
+                    </div>
                     {result.error ? (
                       <Badge variant="destructive">Error</Badge>
                     ) : (
@@ -470,7 +583,7 @@ export default function ATSBulkUpload({
                           <span className="text-sm font-medium">Missing Skills:</span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {result.result.missing_skills.map((skill, skillIndex) => (
-                              <Badge key={skillIndex} variant="outline" className="text-xs">
+                              <Badge key={`${skill}-${skillIndex}`} variant="outline" className="text-xs">
                                 {skill}
                               </Badge>
                             ))}

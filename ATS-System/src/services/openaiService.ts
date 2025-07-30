@@ -32,7 +32,7 @@ export async function extractContactInfo(
     "phone": "+1-555-123-4567"
   }
 
-  If any information is missing or unclear, use empty string for that field.
+  If any information is missing or unclear, use "not found" for that field.
   Only extract information that is clearly present in the resume.
     `.trim();
 

@@ -27,7 +27,8 @@ import {
   TrendingUp,
   Calendar,
   Mail,
-  Phone
+  Phone,
+  RefreshCw
 } from "lucide-react";
 import ATSInterviewIntegration from "@/components/ATSInterviewIntegration";
 import ATSBulkUpload from "@/components/ATSBulkUpload";
@@ -123,20 +124,26 @@ export default function ATSCandidatesPage() {
     }
   };
 
-  const handleCandidateCreated = (candidate: any) => {
+  const handleCandidateCreated = async (candidate: any) => {
     const candidateWithInterview = {
       ...candidate,
       interviewId: selectedInterview?.id || "",
     };
     setCandidates(prev => [...prev, candidateWithInterview]);
+
+    // Reload candidates to ensure data consistency
+    await loadCandidates();
   };
 
-  const handleCandidatesCreated = (candidates: any[]) => {
+  const handleCandidatesCreated = async (candidates: any[]) => {
     const candidatesWithInterview = candidates.map(candidate => ({
       ...candidate,
       interviewId: selectedInterview?.id || "",
     }));
     setCandidates(prev => [...prev, ...candidatesWithInterview]);
+
+    // Reload candidates to ensure data consistency
+    await loadCandidates();
   };
 
   const getScoreColor = (score: number) => {
@@ -301,9 +308,21 @@ return sum + score;
         {filteredCandidates.length > 0 && (
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
                 Candidates ({filteredCandidates.length})
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadCandidates}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </CardTitle>
               <CardDescription>
                 All candidates analyzed for {selectedInterview?.name}
