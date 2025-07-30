@@ -50,7 +50,7 @@ interface Props {
 const base_url = process.env.NEXT_PUBLIC_LIVE_URL;
 
 function InterviewHome({ params, searchParams }: Props) {
-  const [interview, setInterview] = useState<Interview | null>(null);
+  const [interview, setInterview] = useState<Interview | undefined>(undefined);
   const [responses, setResponses] = useState<Response[]>([]);
   const { getInterviewById } = useInterviews();
   const [isSharePopupOpen, setIsSharePopupOpen] = useState(false);
