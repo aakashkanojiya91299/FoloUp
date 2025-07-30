@@ -13,13 +13,16 @@ const createResponse = async (payload: any) => {
 
     if (error) {
       console.error("Supabase error in createResponse:", error);
+
       return null;
     }
 
     console.log("Response created successfully with ID:", data[0]?.id);
+
     return data[0]?.id;
   } catch (error) {
     console.error("Error in createResponse:", error);
+
     return null;
   }
 };
@@ -84,13 +87,16 @@ const getAllEmailAddressesForInterview = async (interviewId: string) => {
 
     if (error) {
       console.error("Supabase error in getAllEmailAddressesForInterview:", error);
+
       return [];
     }
 
     console.log("Retrieved email data:", data);
+
     return data || [];
   } catch (error) {
     console.error("Error in getAllEmailAddressesForInterview:", error);
+
     return [];
   }
 };
