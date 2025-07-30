@@ -332,6 +332,7 @@ export default function CandidateInterviewLinkGenerator({
                                 Created:{" "}
                                 {(() => {
                                   const date = new Date(link.created_at);
+
                                   return date.toLocaleDateString();
                                 })()}
                               </span>

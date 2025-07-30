@@ -495,6 +495,7 @@ export default function ATSCandidatesPage() {
                           {candidate.createdAt
                             ? (() => {
                               const date = new Date(candidate.createdAt);
+
                               return date.toLocaleDateString();
                             })()
                             : "Unknown date"}
