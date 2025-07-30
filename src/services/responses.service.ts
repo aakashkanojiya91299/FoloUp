@@ -3,18 +3,25 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 const supabase = createClientComponentClient();
 
 const createResponse = async (payload: any) => {
-  const { error, data } = await supabase
-    .from("response")
-    .insert({ ...payload })
-    .select("id");
+  try {
+    console.log("Creating response with payload:", payload);
 
-  if (error) {
-    console.log(error);
+    const { error, data } = await supabase
+      .from("response")
+      .insert({ ...payload })
+      .select("id");
 
-    return [];
+    if (error) {
+      console.error("Supabase error in createResponse:", error);
+      return null;
+    }
+
+    console.log("Response created successfully with ID:", data[0]?.id);
+    return data[0]?.id;
+  } catch (error) {
+    console.error("Error in createResponse:", error);
+    return null;
   }
-
-  return data[0]?.id;
 };
 
 const saveResponse = async (payload: any, call_id: string) => {
@@ -68,15 +75,22 @@ const getResponseCountByOrganizationId = async (
 
 const getAllEmailAddressesForInterview = async (interviewId: string) => {
   try {
+    console.log("Fetching emails for interview ID:", interviewId);
+
     const { data, error } = await supabase
       .from("response")
       .select(`email`)
       .eq("interview_id", interviewId);
 
+    if (error) {
+      console.error("Supabase error in getAllEmailAddressesForInterview:", error);
+      return [];
+    }
+
+    console.log("Retrieved email data:", data);
     return data || [];
   } catch (error) {
-    console.log(error);
-
+    console.error("Error in getAllEmailAddressesForInterview:", error);
     return [];
   }
 };

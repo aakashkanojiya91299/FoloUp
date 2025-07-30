@@ -249,16 +249,55 @@ function Call({ interview }: InterviewProps) {
       }
     } else {
     // Regular interview flow with email validation
-      const oldUserEmails: string[] = (
-        await ResponseService.getAllEmails(interview.id)
-      ).map((item) => item.email);
-      const OldUser =
-        oldUserEmails.includes(email) ||
-        (interview?.respondents && !interview?.respondents.includes(email));
+      try {
+        const oldUserEmails: string[] = (
+          await ResponseService.getAllEmails(interview.id)
+        ).map((item) => item.email);
+        
+        console.log("Retrieved emails for interview:", oldUserEmails);
+        console.log("Current user email:", email);
+        
+        const OldUser =
+          oldUserEmails.includes(email) ||
+          (interview?.respondents && !interview?.respondents.includes(email));
 
-      if (OldUser) {
-        setIsOldUser(true);
-      } else {
+        console.log("Is old user:", OldUser);
+        console.log("Interview respondents:", interview?.respondents);
+
+        if (OldUser) {
+          setIsOldUser(true);
+        } else {
+          const registerCallResponse: registerCallResponseType = await axios.post(
+            "/api/register-call",
+            { dynamic_data: data, interviewer_id: interview?.interviewer_id },
+          );
+          if (registerCallResponse.data.registerCallResponse.access_token) {
+            await webClient
+              .startCall({
+                accessToken:
+                  registerCallResponse.data.registerCallResponse.access_token,
+              })
+              .catch(console.error);
+            setIsCalling(true);
+            setIsStarted(true);
+
+            setCallId(registerCallResponse?.data?.registerCallResponse?.call_id);
+
+            const responseId = await createResponse({
+              interview_id: interview.id,
+              call_id: registerCallResponse.data.registerCallResponse.call_id,
+              email: email,
+              name: name,
+            });
+            
+            console.log("Response created with ID:", responseId);
+          } else {
+            console.log("Failed to register call");
+          }
+        }
+      } catch (error) {
+        console.error("Error in email validation flow:", error);
+        // Fallback: proceed with call even if email validation fails
         const registerCallResponse: registerCallResponseType = await axios.post(
           "/api/register-call",
           { dynamic_data: data, interviewer_id: interview?.interviewer_id },
@@ -281,8 +320,8 @@ function Call({ interview }: InterviewProps) {
             email: email,
             name: name,
           });
-        } else {
-          console.log("Failed to register call");
+          
+          console.log("Fallback response created with ID:", responseId);
         }
       }
     }
