@@ -153,7 +153,7 @@ export default function CandidateInterviewLinkGenerator({
 
   const deleteLink = async (linkId: string) => {
     try {
-      await axios.delete(`/api/generate-candidate-link/${linkId}`);
+      await axios.delete(`/api/generate-candidate-link?id=${linkId}`);
       setExistingLinks((prev) => prev.filter((link) => link.id !== linkId));
       toast.success("Link deleted successfully!");
     } catch (error) {
