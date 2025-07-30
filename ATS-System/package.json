@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "start": "ts-node-dev --respawn src/server.ts",
     "test_start": "npx ts-node src/test-huggingface.ts",
     "run_dev": "node dist/server.js"
