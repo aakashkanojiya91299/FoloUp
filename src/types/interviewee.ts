@@ -7,7 +7,7 @@ export interface Interviewee {
   interview_id: string;
   created_at: string;
   updated_at: string;
-  status: 'active' | 'inactive' | 'archived';
+  status: "active" | "inactive" | "archived";
   notes?: string;
 }
 
@@ -26,7 +26,7 @@ export interface Resume {
   education?: string[];
   certifications?: string[];
   languages?: string[];
-  status: 'pending' | 'processed' | 'failed';
+  status: "pending" | "processed" | "failed";
   processing_notes?: string;
 }
 
@@ -43,7 +43,7 @@ export interface ResumeAnalysis {
   experience_summary: string;
   education_summary: string;
   recommendations: string[];
-  ai_provider: 'openai' | 'gemini';
+  ai_provider: "openai" | "gemini";
   created_at: string;
 }
 
@@ -59,4 +59,4 @@ export interface ATSJobRequirements {
   education_required: string[];
   created_at: string;
   updated_at: string;
-} 
+}

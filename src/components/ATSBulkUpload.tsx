@@ -1,9 +1,18 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { atsService, ATSBulkMatchResult } from "@/services/atsService";
-import { CandidateService, Candidate as DBCandidate } from "@/services/candidates.service";
+import {
+  CandidateService,
+  Candidate as DBCandidate,
+} from "@/services/candidates.service";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
@@ -16,7 +25,7 @@ import {
   XCircle,
   Users,
   Star,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { useOrganization } from "@clerk/nextjs";
 
@@ -50,7 +59,7 @@ interface ATSBulkUploadProps {
 
 export default function ATSBulkUpload({
   interview,
-  onCandidatesCreated
+  onCandidatesCreated,
 }: ATSBulkUploadProps) {
   const { organization } = useOrganization();
   const [resumeFiles, setResumeFiles] = useState<FileWithPreview[]>([]);
@@ -68,12 +77,15 @@ export default function ATSBulkUpload({
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     console.log("🎯 onDrop called with files:", acceptedFiles);
-    console.log("Files dropped details:", acceptedFiles.map(f => ({
-      name: f.name,
-      size: f.size,
-      type: f.type,
-      lastModified: f.lastModified
-    })));
+    console.log(
+      "Files dropped details:",
+      acceptedFiles.map((f) => ({
+        name: f.name,
+        size: f.size,
+        type: f.type,
+        lastModified: f.lastModified,
+      })),
+    );
 
     if (!acceptedFiles || acceptedFiles.length === 0) {
       console.log("No files accepted");
@@ -81,20 +93,23 @@ export default function ATSBulkUpload({
       return;
     }
 
-    const filesWithPreview = acceptedFiles.map(file => {
+    const filesWithPreview = acceptedFiles.map((file) => {
       const fileWithPreview: FileWithPreview = {
         file: file,
-        preview: URL.createObjectURL(file)
+        preview: URL.createObjectURL(file),
       };
       console.log("Created file with preview:", fileWithPreview.file.name);
 
       return fileWithPreview;
     });
 
-    setResumeFiles(prev => {
+    setResumeFiles((prev) => {
       const newFiles = [...prev, ...filesWithPreview];
       console.log("Updated resume files count:", newFiles.length);
-      console.log("Updated resume files names:", newFiles.map(f => f?.file?.name || 'undefined'));
+      console.log(
+        "Updated resume files names:",
+        newFiles.map((f) => f?.file?.name || "undefined"),
+      );
 
       return newFiles;
     });
@@ -104,18 +119,21 @@ export default function ATSBulkUpload({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'application/msword': ['.doc']
+      "application/pdf": [".pdf"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/msword": [".doc"],
     },
     multiple: true,
     onDropRejected: (rejectedFiles) => {
       console.log("❌ Files rejected:", rejectedFiles);
-      setError("Some files were rejected. Please ensure they are PDF, DOC, or DOCX files.");
+      setError(
+        "Some files were rejected. Please ensure they are PDF, DOC, or DOCX files.",
+      );
     },
     onDragEnter: () => console.log("🎯 Drag enter"),
     onDragLeave: () => console.log("🎯 Drag leave"),
-    onDragOver: () => console.log("🎯 Drag over")
+    onDragOver: () => console.log("🎯 Drag over"),
   });
 
   const checkServerStatus = async () => {
@@ -129,7 +147,9 @@ export default function ATSBulkUpload({
 
   const handleBulkAnalyze = async () => {
     if (!interview.job_description) {
-      setError("No job description found for this interview. Please add one to enable ATS matching.");
+      setError(
+        "No job description found for this interview. Please add one to enable ATS matching.",
+      );
 
       return;
     }
@@ -147,7 +167,7 @@ export default function ATSBulkUpload({
       hasJobDescription: !!interview.job_description,
       jobDescriptionLength: interview.job_description?.length || 0,
       resumeFilesCount: resumeFiles.length,
-      resumeFileNames: resumeFiles.map(f => f?.file?.name || 'undefined')
+      resumeFileNames: resumeFiles.map((f) => f?.file?.name || "undefined"),
     });
 
     setIsLoading(true);
@@ -157,7 +177,10 @@ export default function ATSBulkUpload({
 
     try {
       // Test if job description is valid
-      if (!interview.job_description || interview.job_description.trim().length === 0) {
+      if (
+        !interview.job_description ||
+        interview.job_description.trim().length === 0
+      ) {
         throw new Error("Job description is empty or missing");
       }
 
@@ -168,24 +191,34 @@ export default function ATSBulkUpload({
 
       // Check if all files are valid
       for (const fileWithPreview of resumeFiles) {
-        if (!fileWithPreview || !fileWithPreview.file || fileWithPreview.file.size === 0) {
-          throw new Error(`Invalid file: ${fileWithPreview?.file?.name || 'unknown'}`);
+        if (
+          !fileWithPreview ||
+          !fileWithPreview.file ||
+          fileWithPreview.file.size === 0
+        ) {
+          throw new Error(
+            `Invalid file: ${fileWithPreview?.file?.name || "unknown"}`,
+          );
         }
       }
 
       // Check ATS server status first
       const serverStatus = await atsService.getHealthStatus();
       if (!serverStatus) {
-        throw new Error("ATS server is not running. Please start the ATS server first.");
+        throw new Error(
+          "ATS server is not running. Please start the ATS server first.",
+        );
       }
 
       // Extract File objects from FileWithPreview for the service
-      const fileObjects = resumeFiles.map(fileWithPreview => fileWithPreview.file);
+      const fileObjects = resumeFiles.map(
+        (fileWithPreview) => fileWithPreview.file,
+      );
 
       // Analyze all resumes
       const bulkResult = await atsService.matchMultipleResumesToJDText(
         fileObjects,
-        interview.job_description
+        interview.job_description,
       );
 
       // Extract contact info for each file and add candidate names to results
@@ -193,7 +226,7 @@ export default function ATSBulkUpload({
         bulkResult.results.map(async (result) => {
           // Find the corresponding file to extract contact info
           const resumeFileWithPreview = resumeFiles.find(
-            fileWithPreview => fileWithPreview?.file?.name === result.file
+            (fileWithPreview) => fileWithPreview?.file?.name === result.file,
           );
 
           let candidateName = getCleanFileName(result.file); // Use filename as fallback
@@ -201,20 +234,29 @@ export default function ATSBulkUpload({
           // Try to extract contact info from the resume
           if (resumeFileWithPreview && !result.error) {
             try {
-              const contactInfo = await atsService.extractContactInfo(resumeFileWithPreview.file);
-              if (contactInfo.name && contactInfo.name !== "not found" && contactInfo.name.trim() !== "") {
+              const contactInfo = await atsService.extractContactInfo(
+                resumeFileWithPreview.file,
+              );
+              if (
+                contactInfo.name &&
+                contactInfo.name !== "not found" &&
+                contactInfo.name.trim() !== ""
+              ) {
                 candidateName = contactInfo.name;
               }
             } catch (error) {
-              console.warn(`Could not extract contact info from ${result.file}:`, error);
+              console.warn(
+                `Could not extract contact info from ${result.file}:`,
+                error,
+              );
             }
           }
 
           return {
             ...result,
-            candidateName
+            candidateName,
           };
-        })
+        }),
       );
 
       setResults(resultsWithNames);
@@ -225,7 +267,9 @@ export default function ATSBulkUpload({
       for (const result of resultsWithNames) {
         if (result.result && !result.error) {
           // Find the corresponding file to extract contact info
-          const resumeFileWithPreview = resumeFiles.find(fileWithPreview => fileWithPreview?.file?.name === result.file);
+          const resumeFileWithPreview = resumeFiles.find(
+            (fileWithPreview) => fileWithPreview?.file?.name === result.file,
+          );
 
           let candidateName = getDisplayName(result.candidateName, result.file); // Use extracted name or filename as fallback
           let candidateEmail = `candidate-${Date.now()}@example.com`; // Generate placeholder email
@@ -234,7 +278,9 @@ export default function ATSBulkUpload({
           // Try to extract contact info from the resume for email and phone
           if (resumeFileWithPreview) {
             try {
-              const contactInfo = await atsService.extractContactInfo(resumeFileWithPreview.file);
+              const contactInfo = await atsService.extractContactInfo(
+                resumeFileWithPreview.file,
+              );
               if (contactInfo.email && contactInfo.email !== "not found") {
                 candidateEmail = contactInfo.email;
               }
@@ -242,7 +288,10 @@ export default function ATSBulkUpload({
                 candidatePhone = contactInfo.phone;
               }
             } catch (error) {
-              console.warn(`Could not extract contact info from ${result.file}:`, error);
+              console.warn(
+                `Could not extract contact info from ${result.file}:`,
+                error,
+              );
             }
           }
 
@@ -258,7 +307,8 @@ export default function ATSBulkUpload({
             ats_feedback: result.result.feedback,
           };
 
-          const savedCandidate = await CandidateService.createCandidate(dbCandidate);
+          const savedCandidate =
+            await CandidateService.createCandidate(dbCandidate);
           if (savedCandidate) {
             successfulCandidates.push(savedCandidate);
           }
@@ -272,7 +322,6 @@ export default function ATSBulkUpload({
 
       // Clear processed files
       setResumeFiles([]);
-
     } catch (err: any) {
       setError(err.message || "Failed to analyze resumes");
     } finally {
@@ -288,15 +337,23 @@ export default function ATSBulkUpload({
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) { return "text-green-600"; }
-    if (score >= 60) { return "text-yellow-600"; }
+    if (score >= 80) {
+      return "text-green-600";
+    }
+    if (score >= 60) {
+      return "text-yellow-600";
+    }
 
     return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) { return <Badge className="bg-green-100 text-green-800">Excellent</Badge>; }
-    if (score >= 60) { return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>; }
+    if (score >= 80) {
+      return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
+    }
+    if (score >= 60) {
+      return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
+    }
 
     return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
@@ -305,29 +362,37 @@ export default function ATSBulkUpload({
     return filename.replace(/\.[^/.]+$/, "");
   };
 
-  const getDisplayName = (candidateName: string | undefined, filename: string) => {
+  const getDisplayName = (
+    candidateName: string | undefined,
+    filename: string,
+  ) => {
     if (candidateName && candidateName !== "not found") {
       return candidateName;
     }
+
     return getCleanFileName(filename);
   };
 
   // Load existing candidates from database
   const loadCandidates = async () => {
-    if (!organization?.id || !interview?.id) { return; }
+    if (!organization?.id || !interview?.id) {
+      return;
+    }
 
     try {
-      const dbCandidates = await CandidateService.getCandidatesByInterview(interview.id);
+      const dbCandidates = await CandidateService.getCandidatesByInterview(
+        interview.id,
+      );
 
       // Convert database candidates to UI format for results display
-      const uiResults: BulkUploadResult[] = dbCandidates.map(dbCandidate => ({
-        file: dbCandidate.resume_filename || 'Unknown file',
+      const uiResults: BulkUploadResult[] = dbCandidates.map((dbCandidate) => ({
+        file: dbCandidate.resume_filename || "Unknown file",
         candidateName: dbCandidate.name,
         result: {
           match_score: dbCandidate.ats_score,
           missing_skills: dbCandidate.ats_missing_skills || [],
-          feedback: dbCandidate.ats_feedback || ''
-        }
+          feedback: dbCandidate.ats_feedback || "",
+        },
       }));
 
       setResults(uiResults);
@@ -353,9 +418,7 @@ export default function ATSBulkUpload({
               <FileText className="h-5 w-5" />
               Bulk Upload: {interview.name}
             </CardTitle>
-            <CardDescription>
-              Loading...
-            </CardDescription>
+            <CardDescription>Loading...</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -372,7 +435,8 @@ export default function ATSBulkUpload({
             Bulk Upload: {interview.name}
           </CardTitle>
           <CardDescription>
-            Upload multiple resumes to analyze against this interview&apos;s job description
+            Upload multiple resumes to analyze against this interview&apos;s job
+            description
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -386,7 +450,8 @@ export default function ATSBulkUpload({
           ) : (
             <Alert>
               <AlertDescription>
-                No job description found for this interview. Please add a job description to enable ATS matching.
+                  No job description found for this interview. Please add a job
+                  description to enable ATS matching.
               </AlertDescription>
             </Alert>
           )}
@@ -421,7 +486,8 @@ export default function ATSBulkUpload({
             Bulk Resume Upload
           </CardTitle>
           <CardDescription>
-            Drag and drop multiple resume files (PDF, DOC, DOCX) or click to browse
+            Drag and drop multiple resume files (PDF, DOC, DOCX) or click to
+            browse
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -429,8 +495,8 @@ export default function ATSBulkUpload({
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
-                ? "border-blue-400 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400"
+                  ? "border-blue-400 bg-blue-50"
+                  : "border-gray-300 hover:border-gray-400"
                 }`}
             >
               <input {...getInputProps()} />
@@ -453,13 +519,23 @@ export default function ATSBulkUpload({
           {/* File List */}
           {isClient && resumeFiles.length > 0 && (
             <div className="mt-4">
-              <h4 className="font-medium mb-2">Selected Files ({resumeFiles.length})</h4>
+              <h4 className="font-medium mb-2">
+                Selected Files ({resumeFiles.length})
+              </h4>
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {resumeFiles.map((fileWithPreview, index) => (
-                  <div key={`${fileWithPreview?.file?.name}-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                    <span className="text-sm truncate">{fileWithPreview?.file?.name || 'Unknown file'}</span>
+                  <div
+                    key={`${fileWithPreview?.file?.name}-${index}`}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                  >
+                    <span className="text-sm truncate">
+                      {fileWithPreview?.file?.name || "Unknown file"}
+                    </span>
                     <span className="text-xs text-gray-500">
-                      {fileWithPreview?.file?.size ? (fileWithPreview.file.size / 1024 / 1024).toFixed(2) : '0'} MB
+                      {fileWithPreview?.file?.size
+                        ? (fileWithPreview.file.size / 1024 / 1024).toFixed(2)
+                        : "0"}{" "}
+                      MB
                     </span>
                   </div>
                 ))}
@@ -468,10 +544,15 @@ export default function ATSBulkUpload({
           )}
 
           {/* Debug Info */}
-          {isClient && process.env.NODE_ENV === 'development' && (
+          {isClient && process.env.NODE_ENV === "development" && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
               <p>Debug: {resumeFiles.length} files in state</p>
-              <p>Files: {resumeFiles.map(f => f?.file?.name || 'undefined').join(', ')}</p>
+              <p>
+                Files:{" "}
+                {resumeFiles
+                  .map((f) => f?.file?.name || "undefined")
+                  .join(", ")}
+              </p>
             </div>
           )}
         </CardContent>
@@ -481,7 +562,11 @@ export default function ATSBulkUpload({
       {isClient && (
         <div className="flex gap-3">
           <Button
-            disabled={isLoading || resumeFiles.length === 0 || !interview.job_description}
+            disabled={
+              isLoading ||
+              resumeFiles.length === 0 ||
+              !interview.job_description
+            }
             className="flex items-center gap-2"
             onClick={handleBulkAnalyze}
           >
@@ -490,19 +575,17 @@ export default function ATSBulkUpload({
             ) : (
               <Users className="h-4 w-4" />
             )}
-            {isLoading ? "Analyzing..." : `Analyze ${resumeFiles.length} Candidate${resumeFiles.length !== 1 ? 's' : ''}`}
+            {isLoading
+              ? "Analyzing..."
+              : `Analyze ${resumeFiles.length} Candidate${resumeFiles.length !== 1 ? "s" : ""}`}
           </Button>
 
-          <Button
-            variant="outline"
-            disabled={isLoading}
-            onClick={clearFiles}
-          >
+          <Button variant="outline" disabled={isLoading} onClick={clearFiles}>
             Clear All
           </Button>
 
           {/* Debug button for testing */}
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <Button
               variant="outline"
               onClick={() => {
@@ -547,17 +630,27 @@ export default function ATSBulkUpload({
           <CardContent>
             <div className="space-y-4">
               {results.map((result, index) => (
-                <div key={`${result.file}-${index}`} className="border rounded-lg p-4">
+                <div
+                  key={`${result.file}-${index}`}
+                  className="border rounded-lg p-4"
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex flex-col">
                       <h4 className="font-medium">
                         {getDisplayName(result.candidateName, result.file)}
                       </h4>
-                      {result.candidateName && result.candidateName !== "not found" && result.candidateName !== getCleanFileName(result.file) && (
-                        <span className="text-sm text-gray-500">File: {result.file}</span>
-                      )}
+                      {result.candidateName &&
+                        result.candidateName !== "not found" &&
+                        result.candidateName !==
+                        getCleanFileName(result.file) && (
+                          <span className="text-sm text-gray-500">
+                            File: {result.file}
+                          </span>
+                        )}
                       {result.candidateName === "not found" && (
-                        <span className="text-sm text-gray-500">Name: Not Found</span>
+                        <span className="text-sm text-gray-500">
+                          Name: Not Found
+                        </span>
                       )}
                     </div>
                     {result.error ? (
@@ -572,29 +665,44 @@ export default function ATSBulkUpload({
                   ) : result.result ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Match Score:</span>
-                        <span className={`font-bold ${getScoreColor(result.result.match_score)}`}>
+                          <span className="text-sm font-medium">
+                            Match Score:
+                          </span>
+                          <span
+                            className={`font-bold ${getScoreColor(result.result.match_score)}`}
+                          >
                           {result.result.match_score}%
                         </span>
                       </div>
 
-                      {Array.isArray(result.result.missing_skills) && result.result.missing_skills.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium">Missing Skills:</span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {result.result.missing_skills.map((skill, skillIndex) => (
-                              <Badge key={`${skill}-${skillIndex}`} variant="outline" className="text-xs">
-                                {skill}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                        {Array.isArray(result.result.missing_skills) &&
+                          result.result.missing_skills.length > 0 && (
+                            <div>
+                            <span className="text-sm font-medium">
+                              Missing Skills:
+                            </span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {result.result.missing_skills.map(
+                                (skill, skillIndex) => (
+                                  <Badge
+                                    key={`${skill}-${skillIndex}`}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ),
+                              )}
+                              </div>
+                            </div>
+                          )}
 
                       {result.result.feedback && (
                         <div>
                           <span className="text-sm font-medium">Feedback:</span>
-                          <p className="text-sm text-gray-600 mt-1">{result.result.feedback}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {result.result.feedback}
+                            </p>
                         </div>
                       )}
                     </div>
@@ -602,10 +710,9 @@ export default function ATSBulkUpload({
                 </div>
               ))}
             </div>
-
           </CardContent>
         </Card>
       )}
     </div>
   );
-} 
+}

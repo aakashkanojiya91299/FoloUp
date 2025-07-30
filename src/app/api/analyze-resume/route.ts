@@ -1,76 +1,89 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { aiService } from '@/services/ai.service';
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+import { aiService } from "@/services/ai.service";
 import {
   getAIProviderPreference,
   getOrganizationAIProviderPreference,
-} from '@/services/ai-provider-preferences.service';
+} from "@/services/ai-provider-preferences.service";
 
 export async function POST(request: NextRequest) {
   try {
-    const { resumeId, interviewId, organizationId, userId } = await request.json();
+    const { resumeId, interviewId, organizationId, userId } =
+      await request.json();
 
     if (!resumeId || !interviewId || !organizationId || !userId) {
       return NextResponse.json(
-        { error: 'Resume ID, Interview ID, Organization ID, and User ID are required' },
-        { status: 400 }
+        {
+          error:
+            "Resume ID, Interview ID, Organization ID, and User ID are required",
+        },
+        { status: 400 },
       );
     }
 
     // Get the resume and interview data
     const { data: resume, error: resumeError } = await supabase
-      .from('resumes')
-      .select('*')
-      .eq('id', resumeId)
+      .from("resumes")
+      .select("*")
+      .eq("id", resumeId)
       .single();
 
     if (resumeError || !resume) {
-      return NextResponse.json(
-        { error: 'Resume not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Resume not found" }, { status: 404 });
     }
 
     const { data: interview, error: interviewError } = await supabase
-      .from('interview')
-      .select('*')
-      .eq('id', interviewId)
+      .from("interview")
+      .select("*")
+      .eq("id", interviewId)
       .single();
 
     if (interviewError || !interview) {
       return NextResponse.json(
-        { error: 'Interview not found' },
-        { status: 404 }
+        { error: "Interview not found" },
+        { status: 404 },
       );
     }
 
     // Get AI provider preference (same logic as interview question generation)
-    let preferredProvider = 'openai'; // default fallback
+    let preferredProvider = "openai"; // default fallback
 
     try {
       // Try user preference first
-      const userPreference = await getAIProviderPreference(organizationId, userId);
+      const userPreference = await getAIProviderPreference(
+        organizationId,
+        userId,
+      );
       if (userPreference) {
         preferredProvider = userPreference.preferred_provider;
-        console.log(`ATS Analysis: Using user preference: ${preferredProvider}`);
+        console.log(
+          `ATS Analysis: Using user preference: ${preferredProvider}`,
+        );
       } else {
         // Fall back to organization preference
-        const orgPreference = await getOrganizationAIProviderPreference(organizationId);
+        const orgPreference =
+          await getOrganizationAIProviderPreference(organizationId);
         if (orgPreference) {
           preferredProvider = orgPreference.preferred_provider;
-          console.log(`ATS Analysis: Using organization preference: ${preferredProvider}`);
+          console.log(
+            `ATS Analysis: Using organization preference: ${preferredProvider}`,
+          );
         } else {
-          console.log(`ATS Analysis: No preference found, using default: ${preferredProvider}`);
+          console.log(
+            `ATS Analysis: No preference found, using default: ${preferredProvider}`,
+          );
         }
       }
     } catch (prefError) {
-      console.error('Error fetching AI provider preference:', prefError);
+      console.error("Error fetching AI provider preference:", prefError);
       // Continue with default provider
     }
 
     // Set the preferred provider in the AI service
-    aiService.setDefaultProvider(preferredProvider as 'openai' | 'gemini');
-    console.log(`ATS Analysis: AI service provider set to: ${aiService.getCurrentProvider()}`);
+    aiService.setDefaultProvider(preferredProvider as "openai" | "gemini");
+    console.log(
+      `ATS Analysis: AI service provider set to: ${aiService.getCurrentProvider()}`,
+    );
 
     // Create ATS analysis prompt
     const analysisPrompt = `
@@ -79,7 +92,7 @@ export async function POST(request: NextRequest) {
     Job Title: ${interview.name}
     Job Description: ${interview.objective}
     
-    Resume Content: ${resume.parsed_content || 'Resume content not available'}
+    Resume Content: ${resume.parsed_content || "Resume content not available"}
     
     Please provide a comprehensive ATS analysis including:
     1. Overall match score (0-100)
@@ -112,18 +125,19 @@ export async function POST(request: NextRequest) {
 
     // Generate analysis using AI
     const analysisResponse = await aiService.createCompletion({
-      model: 'gpt-4o',
+      model: "gpt-4o",
       messages: [
         {
-          role: 'system',
-          content: 'You are an expert ATS (Applicant Tracking System) analyst. Provide detailed resume analysis in JSON format.'
+          role: "system",
+          content:
+            "You are an expert ATS (Applicant Tracking System) analyst. Provide detailed resume analysis in JSON format.",
         },
         {
-          role: 'user',
-          content: analysisPrompt
-        }
+          role: "user",
+          content: analysisPrompt,
+        },
       ],
-      responseFormat: { type: 'json_object' },
+      responseFormat: { type: "json_object" },
       maxTokens: 1000,
       temperature: 0.3,
     });
@@ -135,31 +149,31 @@ export async function POST(request: NextRequest) {
       if (jsonMatch) {
         analysisData = JSON.parse(jsonMatch[0]);
       } else {
-        throw new Error('No JSON found in response');
+        throw new Error("No JSON found in response");
       }
     } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
+      console.error("Failed to parse AI response:", parseError);
       // Fallback to mock data
       analysisData = {
         overall_score: Math.floor(Math.random() * 40) + 60,
         skills_match: Math.floor(Math.random() * 30) + 70,
         experience_match: Math.floor(Math.random() * 30) + 70,
         education_match: Math.floor(Math.random() * 30) + 70,
-        technical_skills: ['JavaScript', 'React', 'Node.js', 'Python'],
-        soft_skills: ['Communication', 'Teamwork', 'Problem Solving'],
-        experience_summary: '5+ years of software development experience',
-        education_summary: 'Bachelor\'s in Computer Science',
+        technical_skills: ["JavaScript", "React", "Node.js", "Python"],
+        soft_skills: ["Communication", "Teamwork", "Problem Solving"],
+        experience_summary: "5+ years of software development experience",
+        education_summary: "Bachelor's in Computer Science",
         recommendations: [
-          'Highlight relevant project experience',
-          'Add more specific technical skills',
-          'Include certifications if available'
-        ]
+          "Highlight relevant project experience",
+          "Add more specific technical skills",
+          "Include certifications if available",
+        ],
       };
     }
 
     // Save analysis to database
     const { data: savedAnalysis, error: saveError } = await supabase
-      .from('resume_analyses')
+      .from("resume_analyses")
       .insert({
         resume_id: resumeId,
         interview_id: interviewId,
@@ -178,32 +192,31 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (saveError) {
-      console.error('Database error:', saveError);
-      
-return NextResponse.json(
+      console.error("Database error:", saveError);
+
+      return NextResponse.json(
         { error: `Failed to save analysis: ${saveError.message}` },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     // Update resume status to processed
     await supabase
-      .from('resumes')
-      .update({ status: 'processed' })
-      .eq('id', resumeId);
+      .from("resumes")
+      .update({ status: "processed" })
+      .eq("id", resumeId);
 
     return NextResponse.json({
       success: true,
       analysis: savedAnalysis,
       provider: preferredProvider,
     });
-
   } catch (error) {
-    console.error('ATS Analysis error:', error);
-    
-return NextResponse.json(
-      { error: 'Failed to analyze resume' },
-      { status: 500 }
+    console.error("ATS Analysis error:", error);
+
+    return NextResponse.json(
+      { error: "Failed to analyze resume" },
+      { status: 500 },
     );
   }
-} 
+}

@@ -2,36 +2,44 @@
 
 import React, { useState, useEffect } from "react";
 import { useOrganization } from "@clerk/nextjs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { 
-  FileText, 
-  Users, 
-  Star, 
+import {
+  FileText,
+  Users,
+  Star,
   TrendingUp,
   Calendar,
   Mail,
   Phone,
-  RefreshCw
+  RefreshCw,
+  Link as LinkIcon,
 } from "lucide-react";
 import ATSInterviewIntegration from "@/components/ATSInterviewIntegration";
 import ATSBulkUpload from "@/components/ATSBulkUpload";
+import CandidateInterviewLinkGenerator from "@/components/CandidateInterviewLinkGenerator";
 import { InterviewService } from "@/services/interviews.service";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateService } from "@/services/candidates.service";
@@ -58,30 +66,42 @@ interface Candidate {
 
 export default function ATSCandidatesPage() {
   const { organization } = useOrganization();
+  const [isClient, setIsClient] = useState(false);
   const [interviews, setInterviews] = useState<Interview[]>([]);
-  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
+  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(
+    null,
+  );
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
-    if (organization?.id) {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && organization?.id) {
       loadInterviews();
     }
-  }, [organization]);
+  }, [isClient, organization]);
 
   useEffect(() => {
-    if (selectedInterview?.id) {
+    if (isClient && selectedInterview?.id) {
       loadCandidates();
     }
-  }, [selectedInterview]);
+  }, [isClient, selectedInterview]);
 
   const loadInterviews = async () => {
-    if (!organization?.id) {return;}
-    
+    if (!organization?.id) {
+      return;
+    }
+
     setLoading(true);
     try {
-      const data = await InterviewService.getAllInterviews(organization.id, organization.id);
+      const data = await InterviewService.getAllInterviews(
+        organization.id,
+        organization.id,
+      );
       setInterviews(data);
       if (data.length > 0 && !selectedInterview) {
         setSelectedInterview(data[0]);
@@ -94,26 +114,32 @@ export default function ATSCandidatesPage() {
   };
 
   const loadCandidates = async () => {
-    if (!selectedInterview?.id || !organization?.id) {return;}
+    if (!selectedInterview?.id || !organization?.id) {
+      return;
+    }
 
     setLoading(true);
     try {
-      const dbCandidates = await CandidateService.getCandidatesByInterview(selectedInterview.id);
+      const dbCandidates = await CandidateService.getCandidatesByInterview(
+        selectedInterview.id,
+      );
 
       // Convert database candidates to UI format
-      const uiCandidates: Candidate[] = dbCandidates.map(dbCandidate => ({
-        id: dbCandidate.id || '',
+      const uiCandidates: Candidate[] = dbCandidates.map((dbCandidate) => ({
+        id: dbCandidate.id || "",
         name: dbCandidate.name,
         email: dbCandidate.email,
-        phone: dbCandidate.phone || '',
+        phone: dbCandidate.phone || "",
         resume_filename: dbCandidate.resume_filename,
         atsResult: {
           match_score: dbCandidate.ats_score,
           missing_skills: dbCandidate.ats_missing_skills || [],
-          feedback: dbCandidate.ats_feedback || ''
+          feedback: dbCandidate.ats_feedback || "",
         },
-        createdAt: dbCandidate.created_at ? new Date(dbCandidate.created_at) : new Date(),
-        interviewId: dbCandidate.interview_id
+        createdAt: dbCandidate.created_at
+          ? new Date(dbCandidate.created_at)
+          : new Date(),
+        interviewId: dbCandidate.interview_id,
       }));
 
       setCandidates(uiCandidates);
@@ -129,56 +155,77 @@ export default function ATSCandidatesPage() {
       ...candidate,
       interviewId: selectedInterview?.id || "",
     };
-    setCandidates(prev => [...prev, candidateWithInterview]);
+    setCandidates((prev) => [...prev, candidateWithInterview]);
 
     // Reload candidates to ensure data consistency
     await loadCandidates();
   };
 
   const handleCandidatesCreated = async (candidates: any[]) => {
-    const candidatesWithInterview = candidates.map(candidate => ({
+    const candidatesWithInterview = candidates.map((candidate) => ({
       ...candidate,
       interviewId: selectedInterview?.id || "",
     }));
-    setCandidates(prev => [...prev, ...candidatesWithInterview]);
+    setCandidates((prev) => [...prev, ...candidatesWithInterview]);
 
     // Reload candidates to ensure data consistency
     await loadCandidates();
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) {return "text-green-600";}
-    if (score >= 60) {return "text-yellow-600";}
-    
-return "text-red-600";
+    if (score >= 80) {
+      return "text-green-600";
+    }
+    if (score >= 60) {
+      return "text-yellow-600";
+    }
+
+    return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) {return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;}
-    if (score >= 60) {return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;}
-    
-return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
+    if (score >= 80) {
+      return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
+    }
+    if (score >= 60) {
+      return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
+    }
+
+    return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
   const filteredCandidates = candidates.filter(
-    candidate => !selectedInterview || candidate.interviewId === selectedInterview.id
+    (candidate) =>
+      !selectedInterview || candidate.interviewId === selectedInterview.id,
   );
 
   // Sort candidates by match score
   const sortedCandidates = [...filteredCandidates].sort((a, b) => {
     const scoreA = a.atsResult?.match_score || 0;
     const scoreB = b.atsResult?.match_score || 0;
-    
-return sortOrder === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+
+    return sortOrder === "desc" ? scoreB - scoreA : scoreA - scoreB;
   });
 
-  const averageScore = filteredCandidates.length > 0 
-    ? filteredCandidates.reduce((sum, candidate) => {
-      const score = candidate.atsResult?.match_score || 0;
-      
-return sum + score;
-    }, 0) / filteredCandidates.length
-    : 0;
+  const averageScore =
+    filteredCandidates.length > 0
+      ? filteredCandidates.reduce((sum, candidate) => {
+        const score = candidate.atsResult?.match_score || 0;
+
+        return sum + score;
+      }, 0) / filteredCandidates.length
+      : 0;
+
+  if (!isClient) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="p-8 pt-0 ml-12 mr-auto rounded-md">
@@ -187,7 +234,8 @@ return sum + score;
           ATS Candidate Management
         </h2>
         <h3 className="text-sm tracking-tight text-gray-600 font-medium">
-          Upload resumes and analyze candidates against interview job descriptions
+          Upload resumes and analyze candidates against interview job
+          descriptions
         </h3>
 
         {/* Interview Selection */}
@@ -198,14 +246,15 @@ return sum + score;
               Select Interview
             </CardTitle>
             <CardDescription>
-              Choose an interview to manage candidates and analyze resumes against its job description
+              Choose an interview to manage candidates and analyze resumes
+              against its job description
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Select
               value={selectedInterview?.id || ""}
               onValueChange={(value) => {
-                const interview = interviews.find(i => i.id === value);
+                const interview = interviews.find((i) => i.id === value);
                 setSelectedInterview(interview || null);
               }}
             >
@@ -217,7 +266,9 @@ return sum + score;
                   <SelectItem key={interview.id} value={interview.id}>
                     <div className="flex">
                       <span>{interview.name} - </span>
-                      <span className="max-w-xs truncate">{interview.objective}</span>
+                      <span className="max-w-xs truncate">
+                        {interview.objective}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -226,11 +277,17 @@ return sum + score;
             {selectedInterview && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <h4 className="font-medium mb-2">{selectedInterview.name}</h4>
-                <p className="text-sm text-gray-600 mb-2">{selectedInterview.objective}</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  {selectedInterview.objective}
+                </p>
                 {selectedInterview.job_description ? (
-                  <p className="text-sm text-green-600">✓ Job description available</p>
+                  <p className="text-sm text-green-600">
+                    ✓ Job description available
+                  </p>
                 ) : (
-                  <p className="text-sm text-red-600">⚠ No job description found</p>
+                    <p className="text-sm text-red-600">
+                      ⚠ No job description found
+                    </p>
                 )}
               </div>
             )}
@@ -246,7 +303,9 @@ return sum + score;
                   <Users className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="text-sm text-gray-600">Total Candidates</p>
-                    <p className="text-2xl font-bold">{filteredCandidates.length}</p>
+                    <p className="text-2xl font-bold">
+                      {filteredCandidates.length}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -257,7 +316,9 @@ return sum + score;
                   <Star className="h-5 w-5 text-yellow-600" />
                   <div>
                     <p className="text-sm text-gray-600">Average Score</p>
-                    <p className={`text-2xl font-bold ${getScoreColor(averageScore)}`}>
+                    <p
+                      className={`text-2xl font-bold ${getScoreColor(averageScore)}`}
+                    >
                       {averageScore.toFixed(1)}%
                     </p>
                   </div>
@@ -271,7 +332,11 @@ return sum + score;
                   <div>
                     <p className="text-sm text-gray-600">Top Performers</p>
                     <p className="text-2xl font-bold">
-                      {filteredCandidates.filter(c => (c.atsResult?.match_score || 0) >= 80).length}
+                      {
+                        filteredCandidates.filter(
+                          (c) => (c.atsResult?.match_score || 0) >= 80,
+                        ).length
+                      }
                     </p>
                   </div>
                 </div>
@@ -310,17 +375,19 @@ return sum + score;
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Candidates ({filteredCandidates.length})
+                  <Users className="h-5 w-5" />
+                  Candidates ({filteredCandidates.length})
                 </div>
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={loadCandidates}
-                  disabled={loading}
                   className="flex items-center gap-2"
+                  disabled={loading}
+                  size="sm"
+                  variant="outline"
+                  onClick={loadCandidates}
                 >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+                  />
                   Refresh
                 </Button>
               </CardTitle>
@@ -341,15 +408,18 @@ return sum + score;
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0"
-                          onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                          onClick={() =>
+                            setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+                          }
                         >
-                          {sortOrder === 'desc' ? '↓' : '↑'}
+                          {sortOrder === "desc" ? "↓" : "↑"}
                         </Button>
                       </div>
                     </TableHead>
                     <TableHead>Missing Skills</TableHead>
                     <TableHead>Feedback</TableHead>
                     <TableHead>Added</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -358,7 +428,11 @@ return sum + score;
                       <TableCell>
                         <div>
                           <p className="font-medium">{candidate.name}</p>
-                          <p className="text-sm text-gray-500">{candidate.resumeFile?.name || candidate.resume_filename || 'Resume file'}</p>
+                          <p className="text-sm text-gray-500">
+                            {candidate.resumeFile?.name ||
+                              candidate.resume_filename ||
+                              "Resume file"}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -377,7 +451,9 @@ return sum + score;
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <span className={`font-bold ${getScoreColor(candidate.atsResult?.match_score || 0)}`}>
+                          <span
+                            className={`font-bold ${getScoreColor(candidate.atsResult?.match_score || 0)}`}
+                          >
                             {candidate.atsResult?.match_score || 0}%
                           </span>
                           {getScoreBadge(candidate.atsResult?.match_score || 0)}
@@ -385,30 +461,58 @@ return sum + score;
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {candidate.atsResult?.missing_skills?.slice(0, 3).map((skill: string, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {skill}
-                            </Badge>
-                          )) || []}
-                          {candidate.atsResult?.missing_skills && candidate.atsResult.missing_skills.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{candidate.atsResult.missing_skills.length - 3} more
-                            </Badge>
-                          )}
+                          {candidate.atsResult?.missing_skills
+                            ?.slice(0, 3)
+                            .map((skill: string, index: number) => (
+                              <Badge
+                                key={index}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {skill}
+                              </Badge>
+                            )) || []}
+                          {candidate.atsResult?.missing_skills &&
+                            candidate.atsResult.missing_skills.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{candidate.atsResult.missing_skills.length - 3}{" "}
+                                more
+                              </Badge>
+                            )}
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="max-w-md">
                           <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                            {candidate.atsResult?.feedback || 'No feedback available'}
+                            {candidate.atsResult?.feedback ||
+                              "No feedback available"}
                           </p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 text-sm text-gray-500">
                           <Calendar className="h-3 w-3" />
-                          {candidate.createdAt ? candidate.createdAt.toLocaleDateString() : 'Unknown date'}
+                          {candidate.createdAt
+                            ? (() => {
+                              const date = new Date(candidate.createdAt);
+                              return date.toLocaleDateString();
+                            })()
+                            : "Unknown date"}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <CandidateInterviewLinkGenerator
+                          candidate={{
+                            id: candidate.id,
+                            name: candidate.name,
+                            email: candidate.email,
+                            phone: candidate.phone,
+                          }}
+                          interview={selectedInterview!}
+                          onLinkCreated={(link) => {
+                            console.log("New link created:", link);
+                          }}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -424,7 +528,9 @@ return sum + score;
             <CardContent className="flex items-center justify-center h-32">
               <div className="text-center">
                 <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">Select an interview to start managing candidates</p>
+                <p className="text-gray-500">
+                  Select an interview to start managing candidates
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -432,4 +538,4 @@ return sum + score;
       </div>
     </main>
   );
-} 
+}

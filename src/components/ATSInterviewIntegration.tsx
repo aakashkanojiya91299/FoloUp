@@ -3,25 +3,34 @@
 import React, { useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { atsService, ATSMatchResult } from "@/services/atsService";
-import { CandidateService, Candidate as DBCandidate } from "@/services/candidates.service";
+import {
+  CandidateService,
+  Candidate as DBCandidate,
+} from "@/services/candidates.service";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 
-import { 
-  Loader2, 
-  Upload, 
-  FileText, 
-  CheckCircle, 
-  XCircle, 
-  User, 
-  Mail, 
+import {
+  Loader2,
+  Upload,
+  FileText,
+  CheckCircle,
+  XCircle,
+  User,
+  Mail,
   Phone,
   Star,
-  Users
+  Users,
 } from "lucide-react";
 import { useOrganization } from "@clerk/nextjs";
 
@@ -51,9 +60,9 @@ interface ATSInterviewIntegrationProps {
   onCandidateCreated?: (candidate: Candidate) => void;
 }
 
-export default function ATSInterviewIntegration({ 
-  interview, 
-  onCandidateCreated 
+export default function ATSInterviewIntegration({
+  interview,
+  onCandidateCreated,
 }: ATSInterviewIntegrationProps) {
   const { organization } = useOrganization();
   const [resumeFiles, setResumeFiles] = useState<FileWithPreview[]>([]);
@@ -62,18 +71,18 @@ export default function ATSInterviewIntegration({
   const [error, setError] = useState<string | null>(null);
   const [serverStatus, setServerStatus] = useState<boolean | null>(null);
 
-
   const onResumeDrop = useDropzone({
     accept: {
       "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
       "application/msword": [".doc"],
     },
     onDrop: (acceptedFiles) => {
       const filesWithPreview = acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        })
+        }),
       );
       setResumeFiles((prev) => [...prev, ...filesWithPreview]);
     },
@@ -90,9 +99,11 @@ export default function ATSInterviewIntegration({
 
   const handleAnalyzeResume = async (resumeFile: File, candidateInfo: any) => {
     if (!interview.job_description) {
-      setError("No job description found for this interview. Please add a job description first.");
-      
-return;
+      setError(
+        "No job description found for this interview. Please add a job description first.",
+      );
+
+      return;
     }
 
     setIsLoading(true);
@@ -104,19 +115,33 @@ return;
 
       // Use extracted contact info with fallback to filename
       const finalCandidateInfo = {
-        name: (contactInfo.name && contactInfo.name !== "not found") ? contactInfo.name : getCleanFileName(resumeFile.name),
-        email: (contactInfo.email && contactInfo.email !== "not found") ? contactInfo.email : `candidate-${Date.now()}@example.com`,
-        phone: (contactInfo.phone && contactInfo.phone !== "not found") ? contactInfo.phone : (candidateInfo.phone || ""),
+        name:
+          contactInfo.name && contactInfo.name !== "not found"
+            ? contactInfo.name
+            : getCleanFileName(resumeFile.name),
+        email:
+          contactInfo.email && contactInfo.email !== "not found"
+            ? contactInfo.email
+            : `candidate-${Date.now()}@example.com`,
+        phone:
+          contactInfo.phone && contactInfo.phone !== "not found"
+            ? contactInfo.phone
+            : candidateInfo.phone || "",
       };
 
       // Check if we have at least a name (either extracted or from filename)
       if (!finalCandidateInfo.name) {
-        throw new Error("Could not extract name from resume and filename is not available.");
+        throw new Error(
+          "Could not extract name from resume and filename is not available.",
+        );
       }
 
-      const result = await atsService.matchResumeToJDText(resumeFile, interview.job_description);
-      
-      if ('error' in result) {
+      const result = await atsService.matchResumeToJDText(
+        resumeFile,
+        interview.job_description,
+      );
+
+      if ("error" in result) {
         throw new Error(result.error as string);
       }
 
@@ -133,8 +158,9 @@ return;
         ats_feedback: result.feedback,
       };
 
-      const savedCandidate = await CandidateService.createCandidate(dbCandidate);
-      
+      const savedCandidate =
+        await CandidateService.createCandidate(dbCandidate);
+
       if (savedCandidate) {
         // Add to local state for UI
         const candidate: Candidate = {
@@ -147,7 +173,7 @@ return;
           createdAt: new Date(),
         };
 
-        setCandidates(prev => [...prev, candidate]);
+        setCandidates((prev) => [...prev, candidate]);
         onCandidateCreated?.(candidate);
 
         // Reload candidates to ensure data consistency
@@ -155,10 +181,9 @@ return;
       } else {
         throw new Error("Failed to save candidate to database");
       }
-      
-      // Remove the processed file
-      setResumeFiles(prev => prev.filter(f => f !== resumeFile));
 
+      // Remove the processed file
+      setResumeFiles((prev) => prev.filter((f) => f !== resumeFile));
     } catch (err: any) {
       setError(err.message || "Failed to analyze resume");
     } finally {
@@ -166,47 +191,61 @@ return;
     }
   };
 
-
-
   const clearFiles = () => {
     setResumeFiles([]);
     setError(null);
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) {return "text-green-600";}
-    if (score >= 60) {return "text-yellow-600";}
-    
-return "text-red-600";
+    if (score >= 80) {
+      return "text-green-600";
+    }
+    if (score >= 60) {
+      return "text-yellow-600";
+    }
+
+    return "text-red-600";
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 80) {return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;}
-    if (score >= 60) {return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;}
-    
-return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
+    if (score >= 80) {
+      return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
+    }
+    if (score >= 60) {
+      return <Badge className="bg-yellow-100 text-yellow-800">Good</Badge>;
+    }
+
+    return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
   };
 
   const getCleanFileName = (filename: string) => {
     return filename.replace(/\.[^/.]+$/, "");
   };
 
-  const getDisplayName = (candidateName: string | undefined, filename: string) => {
+  const getDisplayName = (
+    candidateName: string | undefined,
+    filename: string,
+  ) => {
     if (candidateName && candidateName !== "not found") {
       return candidateName;
     }
+
     return getCleanFileName(filename);
   };
 
   // Load existing candidates from database
   const loadCandidates = async () => {
-    if (!organization?.id) {return;}
-    
+    if (!organization?.id) {
+      return;
+    }
+
     try {
-      const dbCandidates = await CandidateService.getCandidatesByInterview(interview.id);
-      
+      const dbCandidates = await CandidateService.getCandidatesByInterview(
+        interview.id,
+      );
+
       // Convert database candidates to UI format
-      const uiCandidates: Candidate[] = dbCandidates.map(dbCandidate => ({
+      const uiCandidates: Candidate[] = dbCandidates.map((dbCandidate) => ({
         id: dbCandidate.id || `candidate_${Date.now()}`,
         name: dbCandidate.name,
         email: dbCandidate.email,
@@ -219,7 +258,7 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
         },
         createdAt: new Date(dbCandidate.created_at || Date.now()),
       }));
-      
+
       setCandidates(uiCandidates);
     } catch (error) {
       console.error("Error loading candidates:", error);
@@ -240,9 +279,7 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
             <FileText className="h-5 w-5" />
             Interview: {interview.name}
           </CardTitle>
-          <CardDescription>
-            {interview.objective}
-          </CardDescription>
+          <CardDescription>{interview.objective}</CardDescription>
         </CardHeader>
         <CardContent>
           {interview.job_description ? (
@@ -255,7 +292,8 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
           ) : (
             <Alert>
               <AlertDescription>
-                No job description found for this interview. Please add a job description to enable ATS matching.
+                  No job description found for this interview. Please add a job
+                  description to enable ATS matching.
               </AlertDescription>
             </Alert>
           )}
@@ -288,14 +326,16 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
             Upload Resume
           </CardTitle>
           <CardDescription>
-            Upload a resume to automatically extract contact information and analyze against the job description
+            Upload a resume to automatically extract contact information and
+            analyze against the job description
           </CardDescription>
         </CardHeader>
         <CardContent>
           {!interview.job_description ? (
             <Alert>
               <AlertDescription>
-                Please add a job description to this interview to enable ATS matching.
+                Please add a job description to this interview to enable ATS
+                matching.
               </AlertDescription>
             </Alert>
           ) : (
@@ -322,24 +362,33 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
                     <h4 className="font-medium">Selected Files:</h4>
                     <div className="space-y-2">
                       {resumeFiles.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <span className="text-sm">{file.name}</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={isLoading}
-                            className="flex items-center gap-2"
-                            onClick={() => handleAnalyzeResume(file, { name: "", email: "", phone: "" })}
-                          >
-                            {isLoading ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Star className="h-3 w-3" />
-                            )}
-                            Analyze
-                          </Button>
-                        </div>
-                      ))}
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                      >
+                        <span className="text-sm">{file.name}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={isLoading}
+                          className="flex items-center gap-2"
+                          onClick={() =>
+                            handleAnalyzeResume(file, {
+                              name: "",
+                              email: "",
+                              phone: "",
+                            })
+                          }
+                        >
+                          {isLoading ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Star className="h-3 w-3" />
+                          )}
+                          Analyze
+                        </Button>
+                      </div>
+                    ))}
                     </div>
                   </div>
                 )}
@@ -375,60 +424,87 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
                         <div>
                           <h4 className="font-semibold">
                             {candidate.name}
-                            {candidate.name === getCleanFileName(candidate.resumeFile.name) && (
-                              <span className="text-xs text-gray-500 ml-2">(from filename)</span>
+                            {candidate.name ===
+                              getCleanFileName(candidate.resumeFile.name) && (
+                                <span className="text-xs text-gray-500 ml-2">
+                                  (from filename)
+                                </span>
                             )}
                           </h4>
                           <div className="flex items-center gap-4 text-sm text-gray-600">
                             <span className="flex items-center gap-1">
                               <Mail className="h-4 w-4" />
                               {candidate.email === "not found" ? (
-                                <span className="text-red-500">Email: Not Found</span>
+                                <span className="text-red-500">
+                                  Email: Not Found
+                                </span>
                               ) : candidate.email.includes("candidate-") ? (
-                                <span className="text-yellow-600">Email: Generated</span>
+                                  <span className="text-yellow-600">
+                                    Email: Generated
+                                  </span>
                               ) : (
                                 candidate.email
                               )}
                             </span>
                             <span className="flex items-center gap-1">
                               <Phone className="h-4 w-4" />
-                              {candidate.phone && candidate.phone !== "not found" ? (
+                              {candidate.phone &&
+                                candidate.phone !== "not found" ? (
                                 candidate.phone
                               ) : (
-                                <span className="text-red-500">Phone: Not Found</span>
+                                  <span className="text-red-500">
+                                    Phone: Not Found
+                                  </span>
                               )}
                             </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* ATS Results */}
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Match Score:</span>
+                          <span className="text-sm font-medium">
+                            Match Score:
+                          </span>
                           <div className="flex items-center gap-2">
-                            <Progress value={candidate.atsResult.match_score} className="w-20" />
-                            <span className={`text-lg font-bold ${getScoreColor(candidate.atsResult.match_score)}`}>
+                            <Progress
+                              value={candidate.atsResult.match_score}
+                              className="w-20"
+                            />
+                            <span
+                              className={`text-lg font-bold ${getScoreColor(candidate.atsResult.match_score)}`}
+                            >
                               {candidate.atsResult.match_score}%
                             </span>
                             {getScoreBadge(candidate.atsResult.match_score)}
                           </div>
                         </div>
-                        
+
                         <div>
                           <span className="text-sm font-medium">Feedback:</span>
-                          <p className="text-sm text-gray-600 mt-1">{candidate.atsResult.feedback}</p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {candidate.atsResult.feedback}
+                          </p>
                         </div>
 
                         {candidate.atsResult.missing_skills.length > 0 && (
                           <div>
-                            <span className="text-sm font-medium">Missing Skills:</span>
+                            <span className="text-sm font-medium">
+                              Missing Skills:
+                            </span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {candidate.atsResult.missing_skills.map((skill, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ))}
+                              {candidate.atsResult.missing_skills.map(
+                                (skill, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ),
+                              )}
                             </div>
                           </div>
                         )}
@@ -441,8 +517,6 @@ return <Badge className="bg-red-100 text-red-800">Needs Improvement</Badge>;
           </CardContent>
         </Card>
       )}
-
-
     </div>
   );
-} 
+}

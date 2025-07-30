@@ -2,9 +2,19 @@
 
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { atsService, ATSMatchResult, ATSMultipleMatchResult } from "@/services/atsService";
+import {
+  atsService,
+  ATSMatchResult,
+  ATSMultipleMatchResult,
+} from "@/services/atsService";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -25,14 +35,15 @@ export default function ATSResumeMatcher() {
   const onResumeDrop = useDropzone({
     accept: {
       "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
       "application/msword": [".doc"],
     },
     onDrop: (acceptedFiles) => {
       const filesWithPreview = acceptedFiles.map((file) =>
         Object.assign(file, {
           preview: URL.createObjectURL(file),
-        })
+        }),
       );
       setResumeFiles((prev) => [...prev, ...filesWithPreview]);
     },
@@ -41,7 +52,8 @@ export default function ATSResumeMatcher() {
   const onJDDrop = useDropzone({
     accept: {
       "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
       "application/msword": [".doc"],
     },
     maxFiles: 1,
@@ -67,8 +79,8 @@ export default function ATSResumeMatcher() {
   const handleMatch = async () => {
     if (!jdFile || resumeFiles.length === 0) {
       setError("Please upload both a job description and at least one resume.");
-      
-return;
+
+      return;
     }
 
     setIsLoading(true);
@@ -76,7 +88,10 @@ return;
     setResults(null);
 
     try {
-      const result = await atsService.matchMultipleResumesToJD(resumeFiles, jdFile);
+      const result = await atsService.matchMultipleResumesToJD(
+        resumeFiles,
+        jdFile,
+      );
       setResults(result);
     } catch (err: any) {
       setError(err.message || "Failed to match resumes");
@@ -105,7 +120,8 @@ return;
             ATS Resume Matcher
           </CardTitle>
           <CardDescription>
-            Upload resumes and job descriptions to get AI-powered matching scores and feedback
+            Upload resumes and job descriptions to get AI-powered matching
+            scores and feedback
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -173,7 +189,9 @@ return;
                 <p className="text-sm text-gray-600">
                   Drop resumes here, or click to select
                 </p>
-                <p className="text-xs text-gray-500">PDF, DOC, or DOCX (max 5 files)</p>
+                <p className="text-xs text-gray-500">
+                  PDF, DOC, or DOCX (max 5 files)
+                </p>
               </div>
             </div>
           </div>
@@ -184,7 +202,11 @@ return;
               <label className="text-sm font-medium">Uploaded Resumes:</label>
               <div className="flex flex-wrap gap-2">
                 {resumeFiles.map((file, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
                     <FileText className="h-3 w-3" />
                     {file.name}
                   </Badge>
@@ -203,7 +225,12 @@ return;
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
-              disabled={isLoading || !jdFile || resumeFiles.length === 0 || !serverStatus}
+              disabled={
+                isLoading ||
+                !jdFile ||
+                resumeFiles.length === 0 ||
+                !serverStatus
+              }
               className="flex items-center gap-2"
               onClick={handleMatch}
             >
@@ -227,7 +254,8 @@ return;
           <CardHeader>
             <CardTitle>Matching Results</CardTitle>
             <CardDescription>
-              Analysis for {results.jd} against {results.results.length} resume(s)
+              Analysis for {results.jd} against {results.results.length}{" "}
+              resume(s)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -243,25 +271,40 @@ return;
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Match Score:</span>
                       <div className="flex items-center gap-2">
-                        <Progress value={result.result.match_score} className="w-20" />
-                        <span className="text-sm font-bold">{result.result.match_score}%</span>
+                        <Progress
+                          value={result.result.match_score}
+                          className="w-20"
+                        />
+                        <span className="text-sm font-bold">
+                          {result.result.match_score}%
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div>
                       <span className="text-sm font-medium">Feedback:</span>
-                      <p className="text-sm text-gray-600 mt-1">{result.result.feedback}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {result.result.feedback}
+                      </p>
                     </div>
 
                     {result.result.missing_skills.length > 0 && (
                       <div>
-                        <span className="text-sm font-medium">Missing Skills:</span>
+                        <span className="text-sm font-medium">
+                          Missing Skills:
+                        </span>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {result.result.missing_skills.map((skill, skillIndex) => (
-                            <Badge key={skillIndex} variant="outline" className="text-xs">
-                              {skill}
-                            </Badge>
-                          ))}
+                          {result.result.missing_skills.map(
+                            (skill, skillIndex) => (
+                              <Badge
+                                key={skillIndex}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {skill}
+                              </Badge>
+                            ),
+                          )}
                         </div>
                       </div>
                     )}
@@ -274,4 +317,4 @@ return;
       )}
     </div>
   );
-} 
+}

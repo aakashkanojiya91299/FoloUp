@@ -120,9 +120,9 @@ function InterviewCard({ name, interviewerId, id, url, readableSlug }: Props) {
             <CardTitle className="w-full mt-3 mx-2 text-white text-lg">
               {name}
               {isFetching && (
-                <div className="z-100 mt-[-5px]">
+                <span className="z-100 mt-[-5px] block">
                   <MiniLoader />
-                </div>
+                </span>
               )}
             </CardTitle>
           </div>

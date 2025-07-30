@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { FileText, Users, MessageSquare, ArrowRight, Zap } from "lucide-react";
 
 export default function HomePage() {
@@ -13,7 +19,8 @@ export default function HomePage() {
             FoloUp
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            AI-powered interview platform with integrated ATS resume matching and candidate management
+            AI-powered interview platform with integrated ATS resume matching
+            and candidate management
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/ats">
@@ -24,7 +31,11 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button variant="outline" size="lg" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex items-center gap-2"
+              >
                 <Users className="h-5 w-5" />
                 Go to Dashboard
                 <ArrowRight className="h-4 w-4" />
@@ -47,7 +58,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="mb-4">
-                AI-powered resume to job description matching with detailed analysis and feedback.
+                AI-powered resume to job description matching with detailed
+                analysis and feedback.
               </CardDescription>
               <Link href="/dashboard/ats-candidates">
                 <Button className="w-full flex items-center gap-2">
@@ -70,7 +82,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="mb-4">
-                Conduct intelligent interviews with AI-powered questioning and response analysis.
+                Conduct intelligent interviews with AI-powered questioning and
+                response analysis.
               </CardDescription>
               <Link href="/dashboard">
                 <Button className="w-full flex items-center gap-2">
@@ -93,7 +106,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="mb-4">
-                Get insights and analytics on candidate performance and interview outcomes.
+                Get insights and analytics on candidate performance and
+                interview outcomes.
               </CardDescription>
               <Link href="/dashboard">
                 <Button className="w-full flex items-center gap-2">
@@ -110,9 +124,12 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold text-center mb-6">Quick Access</h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">ATS Candidate Management</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                ATS Candidate Management
+              </h3>
               <p className="text-gray-600 mb-4">
-                Upload resumes and analyze candidates against interview job descriptions
+                Upload resumes and analyze candidates against interview job
+                descriptions
               </p>
               <Link href="/dashboard/ats-candidates">
                 <Button className="flex items-center gap-2 mx-auto">
@@ -122,12 +139,17 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Interview Dashboard</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Interview Dashboard
+              </h3>
               <p className="text-gray-600 mb-4">
                 Manage interviews and view candidate responses
               </p>
               <Link href="/dashboard">
-                <Button variant="outline" className="flex items-center gap-2 mx-auto">
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 mx-auto"
+                >
                   <Users className="h-4 w-4" />
                   Go to Dashboard
                 </Button>
@@ -138,4 +160,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-} 
+}

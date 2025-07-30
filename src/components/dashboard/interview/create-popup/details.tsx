@@ -83,7 +83,9 @@ function DetailsPopup({
   };
 
   const switchAIProvider = async (provider: "openai" | "gemini") => {
-    if (provider === selectedAIProvider) {return;}
+    if (provider === selectedAIProvider) {
+      return;
+    }
 
     setIsSwitchingProvider(true);
     try {

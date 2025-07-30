@@ -26,10 +26,11 @@ function FileUpload({
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { getRootProps, getInputProps } = useDropzone({
-    accept: { 
+    accept: {
       "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-      "application/msword": [".doc"]
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/msword": [".doc"],
     },
     maxFiles: 1,
     onDrop: async (acceptedFiles: File[]) => {
@@ -39,8 +40,8 @@ function FileUpload({
           position: "bottom-right",
           duration: 3000,
         });
-        
-return;
+
+        return;
       }
       setFileName(file.name);
       if (file.size > 10 * 1024 * 1024) {
@@ -58,11 +59,11 @@ return;
         formData.append("file", file);
 
         let result;
-        const fileExtension = file.name.toLowerCase().split('.').pop();
-        
-        if (fileExtension === 'pdf') {
+        const fileExtension = file.name.toLowerCase().split(".").pop();
+
+        if (fileExtension === "pdf") {
           result = await parsePdf(formData);
-        } else if (fileExtension === 'docx' || fileExtension === 'doc') {
+        } else if (fileExtension === "docx" || fileExtension === "doc") {
           result = await parseDocx(formData);
         } else {
           throw new Error("Unsupported file type");
@@ -77,7 +78,8 @@ return;
       } catch (error) {
         console.log(error);
         toast.error("Error reading file", {
-          description: "Please try again with a supported file type (PDF, DOCX, DOC).",
+          description:
+            "Please try again with a supported file type (PDF, DOCX, DOC).",
           duration: 3000,
         });
       } finally {
@@ -99,7 +101,9 @@ return;
           <>
             <>
               <Inbox className="w-8 h-8 text-blue-500" />
-              <p className="mt-2 text-sm text-slate-400">Drop PDF, DOCX, or DOC Here</p>
+              <p className="mt-2 text-sm text-slate-400">
+                Drop PDF, DOCX, or DOC Here
+              </p>
             </>
           </>
         </div>

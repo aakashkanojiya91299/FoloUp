@@ -28,4 +28,4 @@ export default function ATSNavigation() {
       </div>
     </div>
   );
-} 
+}

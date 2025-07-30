@@ -99,8 +99,8 @@ export class AIService {
         dangerouslyAllowBrowser: true,
       });
     }
-    
-return this.openai;
+
+    return this.openai;
   }
 
   private initializeGemini() {
@@ -111,8 +111,8 @@ return this.openai;
       }
       this.gemini = new GoogleGenerativeAI(apiKey);
     }
-    
-return this.gemini;
+
+    return this.gemini;
   }
 
   async createCompletion(
@@ -124,17 +124,19 @@ return this.gemini;
     console.log(
       `AI Service: Using provider ${targetProvider} (requested: ${provider}, default: ${globalCurrentProvider})`,
     );
-    
+
     // Log the original request being passed to the AI service
-    console.log('📤 AI Service: Original request received:');
-    console.log('📤 AI Service: Model:', request.model);
-    console.log('📤 AI Service: Temperature:', request.temperature);
-    console.log('📤 AI Service: Max Tokens:', request.maxTokens);
-    console.log('📤 AI Service: Response Format:', request.responseFormat);
-    console.log('📤 AI Service: Number of messages:', request.messages.length);
-    console.log('📤 AI Service: Messages:');
+    console.log("📤 AI Service: Original request received:");
+    console.log("📤 AI Service: Model:", request.model);
+    console.log("📤 AI Service: Temperature:", request.temperature);
+    console.log("📤 AI Service: Max Tokens:", request.maxTokens);
+    console.log("📤 AI Service: Response Format:", request.responseFormat);
+    console.log("📤 AI Service: Number of messages:", request.messages.length);
+    console.log("📤 AI Service: Messages:");
     request.messages.forEach((msg, index) => {
-      console.log(`  ${index + 1}. Role: ${msg.role}, Content: ${msg.content.substring(0, 100)}...`);
+      console.log(
+        `  ${index + 1}. Role: ${msg.role}, Content: ${msg.content.substring(0, 100)}...`,
+      );
     });
 
     try {
@@ -146,11 +148,16 @@ return this.gemini;
         throw new Error(`Unsupported AI provider: ${targetProvider}`);
       }
     } catch (error: any) {
-      console.error(`❌ AI Service: ${targetProvider} failed with error:`, error.message);
-      
+      console.error(
+        `❌ AI Service: ${targetProvider} failed with error:`,
+        error.message,
+      );
+
       // If the primary provider fails, try the fallback
       if (targetProvider !== globalCurrentProvider) {
-        console.log(`❌ AI Service: Already using fallback provider, throwing error`);
+        console.log(
+          `❌ AI Service: Already using fallback provider, throwing error`,
+        );
         throw error; // Don't retry if we're already using fallback
       }
 
@@ -161,18 +168,28 @@ return this.gemini;
       );
 
       try {
-        console.log(`🔄 AI Service: Attempting fallback with ${fallbackProvider}...`);
-        
-return await this.createCompletion(request, fallbackProvider);
+        console.log(
+          `🔄 AI Service: Attempting fallback with ${fallbackProvider}...`,
+        );
+
+        return await this.createCompletion(request, fallbackProvider);
       } catch (fallbackError: any) {
-        console.error(`❌ AI Service: Fallback ${fallbackProvider} also failed:`, fallbackError.message);
+        console.error(
+          `❌ AI Service: Fallback ${fallbackProvider} also failed:`,
+          fallbackError.message,
+        );
 
         // If both providers fail, try direct API call as last resort
-        console.log(`🔄 AI Service: Both providers failed, trying direct API call...`);
+        console.log(
+          `🔄 AI Service: Both providers failed, trying direct API call...`,
+        );
         try {
           return await this.createDirectAPICall(request, fallbackProvider);
         } catch (apiError: any) {
-          console.error(`❌ AI Service: Direct API call also failed:`, apiError.message);
+          console.error(
+            `❌ AI Service: Direct API call also failed:`,
+            apiError.message,
+          );
           // If all methods fail, throw the original error
           throw error;
         }
@@ -213,11 +230,11 @@ return await this.createCompletion(request, fallbackProvider);
   private async createGeminiCompletion(
     request: AICompletionRequest,
   ): Promise<AICompletionResponse> {
-    console.log('🔍 Gemini Debug: Starting Gemini completion...');
-    
+    console.log("🔍 Gemini Debug: Starting Gemini completion...");
+
     try {
       const gemini = this.initializeGemini();
-      console.log('✅ Gemini Debug: Gemini client initialized successfully');
+      console.log("✅ Gemini Debug: Gemini client initialized successfully");
 
       // Map OpenAI models to Gemini models
       const modelMap: Record<string, string> = {
@@ -228,46 +245,54 @@ return await this.createCompletion(request, fallbackProvider);
       };
 
       const geminiModel = modelMap[request.model] || "gemini-2.5-flash";
-      console.log(`🔧 Gemini Debug: Using model: ${geminiModel} (mapped from: ${request.model})`);
-      
+      console.log(
+        `🔧 Gemini Debug: Using model: ${geminiModel} (mapped from: ${request.model})`,
+      );
+
       const model = gemini.getGenerativeModel({ model: geminiModel });
-      console.log('✅ Gemini Debug: Model created successfully');
+      console.log("✅ Gemini Debug: Model created successfully");
 
-    // Convert OpenAI messages to Gemini format
-    const geminiMessages = request.messages.map((msg) => ({
-      role: msg.role === "assistant" ? "model" : msg.role,
-      parts: [{ text: msg.content }],
-    }));
+      // Convert OpenAI messages to Gemini format
+      const geminiMessages = request.messages.map((msg) => ({
+        role: msg.role === "assistant" ? "model" : msg.role,
+        parts: [{ text: msg.content }],
+      }));
 
-    // Handle system messages (Gemini doesn't have system messages, so we prepend to user message)
-    let systemContent = "";
-    const userMessages = request.messages.filter(
-      (msg) => msg.role !== "system",
-    );
+      // Handle system messages (Gemini doesn't have system messages, so we prepend to user message)
+      let systemContent = "";
+      const userMessages = request.messages.filter(
+        (msg) => msg.role !== "system",
+      );
 
-    request.messages.forEach((msg) => {
-      if (msg.role === "system") {
-        systemContent += msg.content + "\n\n";
+      request.messages.forEach((msg) => {
+        if (msg.role === "system") {
+          systemContent += msg.content + "\n\n";
+        }
+      });
+
+      // If there's a system message, prepend it to the first user message
+      if (
+        systemContent &&
+        userMessages.length > 0 &&
+        userMessages[0].role === "user"
+      ) {
+        userMessages[0].content = systemContent + userMessages[0].content;
       }
-    });
 
-    // If there's a system message, prepend it to the first user message
-    if (
-      systemContent &&
-      userMessages.length > 0 &&
-      userMessages[0].role === "user"
-    ) {
-      userMessages[0].content = systemContent + userMessages[0].content;
-    }
+      const geminiUserMessages = userMessages.map((msg) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }],
+      }));
 
-    const geminiUserMessages = userMessages.map((msg) => ({
-      role: msg.role === "assistant" ? "model" : "user",
-      parts: [{ text: msg.content }],
-    }));
-
-      console.log('🔧 Gemini Debug: Converted messages to Gemini format');
-      console.log('📝 Gemini Debug: Number of messages:', request.messages.length);
-      console.log('📝 Gemini Debug: First message preview:', userMessages[0]?.content?.substring(0, 100) + "...");
+      console.log("🔧 Gemini Debug: Converted messages to Gemini format");
+      console.log(
+        "📝 Gemini Debug: Number of messages:",
+        request.messages.length,
+      );
+      console.log(
+        "📝 Gemini Debug: First message preview:",
+        userMessages[0]?.content?.substring(0, 100) + "...",
+      );
 
       // Log the complete request being sent to Gemini
       const geminiRequest = {
@@ -281,36 +306,43 @@ return await this.createCompletion(request, fallbackProvider);
               : "text/plain",
         },
       };
-      
-      console.log('📤 Gemini Debug: Request being sent to Gemini:');
+
+      console.log("📤 Gemini Debug: Request being sent to Gemini:");
       console.log(JSON.stringify(geminiRequest, null, 2));
 
-      console.log('🚀 Gemini Debug: Calling model.generateContent...');
+      console.log("🚀 Gemini Debug: Calling model.generateContent...");
       const result = await model.generateContent(geminiRequest);
-      console.log('✅ Gemini Debug: Model.generateContent completed successfully');
-      
-      console.log('🔄 Gemini Debug: Getting response...');
+      console.log(
+        "✅ Gemini Debug: Model.generateContent completed successfully",
+      );
+
+      console.log("🔄 Gemini Debug: Getting response...");
       const response = await result.response;
-      console.log('✅ Gemini Debug: Response received');
-      
+      console.log("✅ Gemini Debug: Response received");
+
       const text = response.text();
-      console.log('📝 Gemini Debug: Response text length:', text.length);
-      console.log('📝 Gemini Debug: Response preview:', text.substring(0, 200) + "...");
-      
+      console.log("📝 Gemini Debug: Response text length:", text.length);
+      console.log(
+        "📝 Gemini Debug: Response preview:",
+        text.substring(0, 200) + "...",
+      );
+
       // Log the complete response from Gemini
-      console.log('📥 Gemini Debug: Complete response from Gemini:');
-      console.log('📥 Gemini Debug: Raw response text:');
+      console.log("📥 Gemini Debug: Complete response from Gemini:");
+      console.log("📥 Gemini Debug: Raw response text:");
       console.log(text);
-      
+
       // Try to parse as JSON if it looks like JSON
       try {
-        if (text.trim().startsWith('{') || text.trim().startsWith('[')) {
+        if (text.trim().startsWith("{") || text.trim().startsWith("[")) {
           const parsedJson = JSON.parse(text);
-          console.log('📥 Gemini Debug: Parsed JSON response:');
+          console.log("📥 Gemini Debug: Parsed JSON response:");
           console.log(JSON.stringify(parsedJson, null, 2));
         }
       } catch (jsonError) {
-        console.log('📥 Gemini Debug: Response is not valid JSON, treating as plain text');
+        console.log(
+          "📥 Gemini Debug: Response is not valid JSON, treating as plain text",
+        );
       }
 
       if (!text) {
@@ -326,9 +358,9 @@ return await this.createCompletion(request, fallbackProvider);
         },
       };
     } catch (error: any) {
-      console.error('❌ Gemini Debug: Error in createGeminiCompletion:', error);
-      console.error('❌ Gemini Debug: Error message:', error.message);
-      console.error('❌ Gemini Debug: Error stack:', error.stack);
+      console.error("❌ Gemini Debug: Error in createGeminiCompletion:", error);
+      console.error("❌ Gemini Debug: Error message:", error.message);
+      console.error("❌ Gemini Debug: Error stack:", error.stack);
       throw error;
     }
   }
@@ -347,7 +379,9 @@ return await this.createCompletion(request, fallbackProvider);
         }
 
         // Convert OpenAI format to Gemini format
-        const prompt = request.messages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+        const prompt = request.messages
+          .map((msg) => `${msg.role}: ${msg.content}`)
+          .join("\n");
 
         const response = await axios.post(
           "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
@@ -367,10 +401,11 @@ return await this.createCompletion(request, fallbackProvider);
               "Content-Type": "application/json",
               "X-goog-api-key": apiKey,
             },
-          }
+          },
         );
 
-        const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+        const text =
+          response.data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
         if (!text) {
           throw new Error("No content returned from Gemini API");
         }
@@ -401,9 +436,9 @@ return await this.createCompletion(request, fallbackProvider);
           {
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${apiKey}`,
+              Authorization: `Bearer ${apiKey}`,
             },
-          }
+          },
         );
 
         const choice = response.data.choices[0];
@@ -415,14 +450,16 @@ return await this.createCompletion(request, fallbackProvider);
           content: choice.message.content,
           usage: response.data.usage
             ? {
-              promptTokens: response.data.usage.prompt_tokens,
-              completionTokens: response.data.usage.completion_tokens,
-              totalTokens: response.data.usage.total_tokens,
-            }
+                promptTokens: response.data.usage.prompt_tokens,
+                completionTokens: response.data.usage.completion_tokens,
+                totalTokens: response.data.usage.total_tokens,
+              }
             : undefined,
         };
       } else {
-        throw new Error(`Unsupported provider for direct API call: ${provider}`);
+        throw new Error(
+          `Unsupported provider for direct API call: ${provider}`,
+        );
       }
     } catch (error: any) {
       console.error(`❌ AI Service: Direct API call failed:`, error.message);
@@ -435,8 +472,8 @@ return await this.createCompletion(request, fallbackProvider);
     console.log(
       `AI Service getCurrentProvider called, returning: ${globalCurrentProvider}`,
     );
-    
-return globalCurrentProvider;
+
+    return globalCurrentProvider;
   }
 
   // Helper method to set the default provider

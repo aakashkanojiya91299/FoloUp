@@ -249,7 +249,7 @@ function EditInterview({ interview }: EditInterviewProps) {
           onChange={(e) => setObjective(e.target.value)}
           onBlur={(e) => setObjective(e.target.value.trim())}
         />
-        
+
         {/* Job Description Section */}
         <div className="mt-4 ml-2">
           <p className="mb-2 font-medium flex items-center gap-2">
@@ -259,7 +259,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               (Used for ATS resume matching)
             </span>
           </p>
-          
+
           {/* File Upload */}
           <div className="mb-3">
             <p className="text-sm text-gray-600 mb-2">
@@ -273,7 +273,7 @@ function EditInterview({ interview }: EditInterviewProps) {
               setUploadedDocumentContext={setUploadedDocumentContext}
             />
           </div>
-          
+
           {/* Manual Job Description Input */}
           <div>
             <p className="text-sm text-gray-600 mb-2">
@@ -288,12 +288,16 @@ function EditInterview({ interview }: EditInterviewProps) {
               onBlur={(e) => setJobDescription(e.target.value.trim())}
             />
           </div>
-          
+
           {/* Current Job Description Display */}
           {interview?.job_description && !uploadedDocumentContext && (
             <div className="mt-3 p-3 bg-blue-50 rounded-md">
-              <p className="text-sm font-medium text-blue-800 mb-2">Current Job Description:</p>
-              <p className="text-sm text-blue-700">{interview.job_description}</p>
+              <p className="text-sm font-medium text-blue-800 mb-2">
+                Current Job Description:
+              </p>
+              <p className="text-sm text-blue-700">
+                {interview.job_description}
+              </p>
             </div>
           )}
         </div>

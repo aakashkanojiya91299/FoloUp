@@ -43,15 +43,15 @@ export const CandidateService = {
 
       if (error) {
         console.error("Error creating candidate:", error);
-        
-return null;
+
+        return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error creating candidate:", error);
-      
-return null;
+
+      return null;
     }
   },
 
@@ -68,22 +68,24 @@ return null;
 
       if (error) {
         console.error("Error fetching candidates:", error);
-        
-return [];
+
+        return [];
       }
 
       return data || [];
     } catch (error) {
       console.error("Error fetching candidates:", error);
-      
-return [];
+
+      return [];
     }
   },
 
   /**
    * Get all candidates for an organization
    */
-  async getCandidatesByOrganization(organizationId: string): Promise<Candidate[]> {
+  async getCandidatesByOrganization(
+    organizationId: string,
+  ): Promise<Candidate[]> {
     try {
       const { data, error } = await supabase
         .from("candidates")
@@ -93,15 +95,15 @@ return [];
 
       if (error) {
         console.error("Error fetching candidates:", error);
-        
-return [];
+
+        return [];
       }
 
       return data || [];
     } catch (error) {
       console.error("Error fetching candidates:", error);
-      
-return [];
+
+      return [];
     }
   },
 
@@ -118,22 +120,25 @@ return [];
 
       if (error) {
         console.error("Error fetching candidate:", error);
-        
-return null;
+
+        return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error fetching candidate:", error);
-      
-return null;
+
+      return null;
     }
   },
 
   /**
    * Update a candidate
    */
-  async updateCandidate(id: string, updates: Partial<Candidate>): Promise<Candidate | null> {
+  async updateCandidate(
+    id: string,
+    updates: Partial<Candidate>,
+  ): Promise<Candidate | null> {
     try {
       const { data, error } = await supabase
         .from("candidates")
@@ -144,15 +149,15 @@ return null;
 
       if (error) {
         console.error("Error updating candidate:", error);
-        
-return null;
+
+        return null;
       }
 
       return data;
     } catch (error) {
       console.error("Error updating candidate:", error);
-      
-return null;
+
+      return null;
     }
   },
 
@@ -161,22 +166,19 @@ return null;
    */
   async deleteCandidate(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from("candidates")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("candidates").delete().eq("id", id);
 
       if (error) {
         console.error("Error deleting candidate:", error);
-        
-return false;
+
+        return false;
       }
 
       return true;
     } catch (error) {
       console.error("Error deleting candidate:", error);
-      
-return false;
+
+      return false;
     }
   },
-}; 
+};

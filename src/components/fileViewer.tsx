@@ -1,18 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  FileText, 
-  Download, 
-  Eye, 
+import {
+  FileText,
+  Download,
+  Eye,
   X,
   File,
   FileImage,
   FileType,
-  FileCode
+  FileCode,
 } from "lucide-react";
 
 interface FileViewerProps {
@@ -22,22 +27,27 @@ interface FileViewerProps {
   onClose: () => void;
 }
 
-export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerProps) {
+export function FileViewer({
+  fileUrl,
+  filename,
+  isOpen,
+  onClose,
+}: FileViewerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const getFileIcon = (filename: string) => {
-    const ext = filename.toLowerCase().split('.').pop();
+    const ext = filename.toLowerCase().split(".").pop();
     switch (ext) {
-      case 'pdf':
+      case "pdf":
         return <FileType className="h-8 w-8 text-red-500" />;
-      case 'doc':
-      case 'docx':
+      case "doc":
+      case "docx":
         return <FileCode className="h-8 w-8 text-blue-500" />;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
         return <FileImage className="h-8 w-8 text-green-500" />;
       default:
         return <File className="h-8 w-8 text-gray-500" />;
@@ -45,44 +55,44 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
   };
 
   const getFileType = (filename: string) => {
-    const ext = filename.toLowerCase().split('.').pop();
+    const ext = filename.toLowerCase().split(".").pop();
     switch (ext) {
-      case 'pdf':
-        return 'PDF Document';
-      case 'doc':
-        return 'Word Document';
-      case 'docx':
-        return 'Word Document (DOCX)';
-      case 'jpg':
-      case 'jpeg':
-        return 'JPEG Image';
-      case 'png':
-        return 'PNG Image';
-      case 'gif':
-        return 'GIF Image';
+      case "pdf":
+        return "PDF Document";
+      case "doc":
+        return "Word Document";
+      case "docx":
+        return "Word Document (DOCX)";
+      case "jpg":
+      case "jpeg":
+        return "JPEG Image";
+      case "png":
+        return "PNG Image";
+      case "gif":
+        return "GIF Image";
       default:
-        return 'Unknown File Type';
+        return "Unknown File Type";
     }
   };
 
   const handleDownload = () => {
     try {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = fileUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error('Download error:', error);
-      setError('Failed to download file');
+      console.error("Download error:", error);
+      setError("Failed to download file");
     }
   };
 
   const renderFileContent = () => {
-    const ext = filename.toLowerCase().split('.').pop();
-    
-    if (ext === 'pdf') {
+    const ext = filename.toLowerCase().split(".").pop();
+
+    if (ext === "pdf") {
       return (
         <div className="w-full h-96">
           <iframe
@@ -92,14 +102,14 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
           />
         </div>
       );
-    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext || '')) {
+    } else if (["jpg", "jpeg", "png", "gif"].includes(ext || "")) {
       return (
         <div className="flex justify-center">
           <img
             src={fileUrl}
             alt={filename}
             className="max-w-full max-h-96 object-contain rounded-md"
-            onError={() => setError('Failed to load image')}
+            onError={() => setError("Failed to load image")}
           />
         </div>
       );
@@ -107,7 +117,9 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
       return (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-md">
           <FileText className="h-16 w-16 text-gray-400 mb-4" />
-          <p className="text-gray-600 mb-2">Preview not available for this file type</p>
+          <p className="text-gray-600 mb-2">
+            Preview not available for this file type
+          </p>
           <Button variant="outline" onClick={handleDownload}>
             <Download className="mr-2 h-4 w-4" />
             Download to View
@@ -142,7 +154,7 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
             </div>
           </div>
         </DialogHeader>
-        
+
         <div className="mt-4">
           {error ? (
             <div className="flex flex-col items-center justify-center h-64 bg-red-50 rounded-md">
@@ -160,4 +172,4 @@ export function FileViewer({ fileUrl, filename, isOpen, onClose }: FileViewerPro
       </DialogContent>
     </Dialog>
   );
-} 
+}

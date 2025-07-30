@@ -35,7 +35,10 @@ export class ATSService {
 
   constructor() {
     // Use environment variable or default to local ATS server
-    this.baseUrl = process.env.NEXT_PUBLIC_ATS_URL || process.env.ATS_SERVER_URL || "http://localhost:4000/api";
+    this.baseUrl =
+      process.env.NEXT_PUBLIC_ATS_URL ||
+      process.env.ATS_SERVER_URL ||
+      "http://localhost:4000/api";
   }
 
   /**
@@ -43,7 +46,7 @@ export class ATSService {
    */
   async matchResumeToJD(
     resumeFile: File,
-    jdFile: File
+    jdFile: File,
   ): Promise<ATSMatchResult> {
     const formData = new FormData();
     formData.append("resume", resumeFile);
@@ -60,7 +63,7 @@ export class ATSService {
     } catch (error: any) {
       console.error("ATS Service Error:", error);
       throw new Error(
-        error.response?.data?.error || "Failed to match resume to JD"
+        error.response?.data?.error || "Failed to match resume to JD",
       );
     }
   }
@@ -70,24 +73,28 @@ export class ATSService {
    */
   async matchResumeToJDText(
     resumeFile: File,
-    jobDescriptionText: string
+    jobDescriptionText: string,
   ): Promise<ATSMatchResult> {
     const formData = new FormData();
     formData.append("resume", resumeFile);
     formData.append("jobDescription", jobDescriptionText);
 
     try {
-      const response = await axios.post(`${this.baseUrl}/match/text`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post(
+        `${this.baseUrl}/match/text`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       return response.data;
     } catch (error: any) {
       console.error("ATS Service Error:", error);
       throw new Error(
-        error.response?.data?.error || "Failed to match resume to JD"
+        error.response?.data?.error || "Failed to match resume to JD",
       );
     }
   }
@@ -97,10 +104,10 @@ export class ATSService {
    */
   async matchMultipleResumesToJD(
     resumeFiles: File[],
-    jdFile: File
+    jdFile: File,
   ): Promise<ATSMultipleMatchResult> {
     const formData = new FormData();
-    
+
     resumeFiles.forEach((file) => {
       formData.append("resume", file);
     });
@@ -114,14 +121,14 @@ export class ATSService {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       return response.data;
     } catch (error: any) {
       console.error("ATS Service Error:", error);
       throw new Error(
-        error.response?.data?.error || "Failed to match resumes to JD"
+        error.response?.data?.error || "Failed to match resumes to JD",
       );
     }
   }
@@ -131,7 +138,7 @@ export class ATSService {
    */
   async matchMultipleResumesToJDText(
     resumeFiles: File[],
-    jobDescriptionText: string
+    jobDescriptionText: string,
   ): Promise<ATSBulkMatchResult> {
     const formData = new FormData();
 
@@ -144,7 +151,7 @@ export class ATSService {
     console.log("Sending bulk request with:", {
       fileCount: resumeFiles.length,
       jobDescriptionLength: jobDescriptionText.length,
-      jobDescriptionPreview: jobDescriptionText.substring(0, 100)
+      jobDescriptionPreview: jobDescriptionText.substring(0, 100),
     });
 
     try {
@@ -155,7 +162,7 @@ export class ATSService {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        }
+        },
       );
 
       return response.data;
@@ -163,7 +170,7 @@ export class ATSService {
       console.error("ATS Service Error:", error);
       console.error("Error response:", error.response?.data);
       throw new Error(
-        error.response?.data?.error || "Failed to match resumes to JD"
+        error.response?.data?.error || "Failed to match resumes to JD",
       );
     }
   }
@@ -176,17 +183,21 @@ export class ATSService {
     formData.append("resume", resumeFile);
 
     try {
-      const response = await axios.post(`${this.baseUrl}/extract-contact`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await axios.post(
+        `${this.baseUrl}/extract-contact`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       return response.data;
     } catch (error: any) {
       console.error("ATS Service Error:", error);
       throw new Error(
-        error.response?.data?.error || "Failed to extract contact information"
+        error.response?.data?.error || "Failed to extract contact information",
       );
     }
   }
@@ -197,8 +208,8 @@ export class ATSService {
   async getHealthStatus(): Promise<boolean> {
     try {
       await axios.get(`${this.baseUrl.replace("/api", "")}/health`);
-      
-return true;
+
+      return true;
     } catch (error) {
       return false;
     }
@@ -206,4 +217,4 @@ return true;
 }
 
 // Export singleton instance
-export const atsService = new ATSService(); 
+export const atsService = new ATSService();

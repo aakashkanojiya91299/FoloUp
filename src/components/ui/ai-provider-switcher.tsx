@@ -36,7 +36,9 @@ export function AIProviderSwitcher() {
   };
 
   const switchProvider = async (provider: AIProvider) => {
-    if (provider === currentProvider) {return;}
+    if (provider === currentProvider) {
+      return;
+    }
 
     setIsLoading(true);
     try {

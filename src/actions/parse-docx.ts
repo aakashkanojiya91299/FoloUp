@@ -29,4 +29,4 @@ export async function parseDocx(formData: FormData) {
       error: "Failed to parse DOCX",
     };
   }
-} 
+}

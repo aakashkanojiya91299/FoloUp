@@ -16,9 +16,9 @@ function SignUpPage() {
             height={50}
             className="h-12 w-auto mb-4"
           />
-        <h1 className="text-2xl font-bold text-center text-gray-800">
+          <h1 className="text-2xl font-bold text-center text-gray-800">
             Welcome to STS
-        </h1>
+          </h1>
         </div>
         <h1 className="text-md my-3 text-center text-gray-800">
           Mobile version is currently under construction. 🚧

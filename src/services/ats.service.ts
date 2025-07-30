@@ -1,11 +1,15 @@
-import { Resume, ResumeAnalysis, ATSJobRequirements } from "@/types/interviewee";
+import {
+  Resume,
+  ResumeAnalysis,
+  ATSJobRequirements,
+} from "@/types/interviewee";
 
 export class ATSService {
   // Parse resume content and extract information
   static async parseResume(file: File): Promise<Partial<Resume>> {
     try {
       const text = await this.extractTextFromFile(file);
-      
+
       return {
         parsed_content: text,
         skills: this.extractSkills(text),
@@ -15,29 +19,29 @@ export class ATSService {
         languages: this.extractLanguages(text),
       };
     } catch (error) {
-      console.error('Error parsing resume:', error);
-      throw new Error('Failed to parse resume');
+      console.error("Error parsing resume:", error);
+      throw new Error("Failed to parse resume");
     }
   }
 
   // Analyze resume against job requirements
   static async analyzeResume(
-    resume: Resume, 
+    resume: Resume,
     jobRequirements?: ATSJobRequirements,
     interviewId?: string,
-    aiProvider: 'openai' | 'gemini' = 'openai'
+    aiProvider: "openai" | "gemini" = "openai",
   ): Promise<ResumeAnalysis> {
     const analysis: ResumeAnalysis = {
       id: `analysis_${Date.now()}`,
       resume_id: resume.id,
-      interview_id: interviewId || resume.interview_id || '',
+      interview_id: interviewId || resume.interview_id || "",
       ai_provider: aiProvider,
       overall_score: 0,
       skills_match: 0,
       experience_match: 0,
       education_match: 0,
       technical_skills: resume.skills || [],
-      soft_skills: this.extractSoftSkills(resume.parsed_content || ''),
+      soft_skills: this.extractSoftSkills(resume.parsed_content || ""),
       experience_summary: this.generateExperienceSummary(resume),
       education_summary: this.generateEducationSummary(resume),
       recommendations: [],
@@ -46,26 +50,44 @@ export class ATSService {
 
     if (jobRequirements) {
       // Calculate scores based on job requirements
-      analysis.skills_match = this.calculateSkillsMatch(resume, jobRequirements);
-      analysis.experience_match = this.calculateExperienceMatch(resume, jobRequirements);
-      analysis.education_match = this.calculateEducationMatch(resume, jobRequirements);
-      analysis.overall_score = Math.round(
-        (analysis.skills_match + analysis.experience_match + analysis.education_match) / 3
+      analysis.skills_match = this.calculateSkillsMatch(
+        resume,
+        jobRequirements,
       );
-      analysis.recommendations = this.generateRecommendations(resume, jobRequirements);
+      analysis.experience_match = this.calculateExperienceMatch(
+        resume,
+        jobRequirements,
+      );
+      analysis.education_match = this.calculateEducationMatch(
+        resume,
+        jobRequirements,
+      );
+      analysis.overall_score = Math.round(
+        (analysis.skills_match +
+          analysis.experience_match +
+          analysis.education_match) /
+          3,
+      );
+      analysis.recommendations = this.generateRecommendations(
+        resume,
+        jobRequirements,
+      );
     } else {
       // Generate mock scores for demonstration
       analysis.skills_match = Math.floor(Math.random() * 30) + 70;
       analysis.experience_match = Math.floor(Math.random() * 30) + 70;
       analysis.education_match = Math.floor(Math.random() * 30) + 70;
       analysis.overall_score = Math.round(
-        (analysis.skills_match + analysis.experience_match + analysis.education_match) / 3
+        (analysis.skills_match +
+          analysis.experience_match +
+          analysis.education_match) /
+          3,
       );
       analysis.recommendations = [
-        'Highlight relevant project experience',
-        'Add more specific technical skills',
-        'Include certifications if available',
-        'Quantify achievements with metrics'
+        "Highlight relevant project experience",
+        "Add more specific technical skills",
+        "Include certifications if available",
+        "Quantify achievements with metrics",
       ];
     }
 
@@ -75,31 +97,50 @@ export class ATSService {
   // Extract text from various file formats
   private static async extractTextFromFile(file: File): Promise<string> {
     // This is a simplified version. In production, you'd use libraries like pdf-parse, mammoth, etc.
-    if (file.type === 'text/plain') {
+    if (file.type === "text/plain") {
       return await file.text();
-    } else if (file.type === 'application/pdf') {
+    } else if (file.type === "application/pdf") {
       // For PDF files, you'd need a PDF parsing library
       // For now, return a placeholder
-      return 'PDF content would be extracted here';
-    } else if (file.type.includes('word')) {
+      return "PDF content would be extracted here";
+    } else if (file.type.includes("word")) {
       // For Word documents, you'd need a DOC/DOCX parsing library
-      return 'Word document content would be extracted here';
+      return "Word document content would be extracted here";
     }
-    
-    throw new Error('Unsupported file format');
+
+    throw new Error("Unsupported file format");
   }
 
   // Extract skills from resume text
   private static extractSkills(text: string): string[] {
     const commonSkills = [
-      'JavaScript', 'Python', 'Java', 'React', 'Node.js', 'Angular', 'Vue.js',
-      'SQL', 'MongoDB', 'PostgreSQL', 'AWS', 'Docker', 'Kubernetes',
-      'Git', 'Agile', 'Scrum', 'Machine Learning', 'AI', 'Data Analysis',
-      'Project Management', 'Leadership', 'Communication', 'Problem Solving'
+      "JavaScript",
+      "Python",
+      "Java",
+      "React",
+      "Node.js",
+      "Angular",
+      "Vue.js",
+      "SQL",
+      "MongoDB",
+      "PostgreSQL",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "Git",
+      "Agile",
+      "Scrum",
+      "Machine Learning",
+      "AI",
+      "Data Analysis",
+      "Project Management",
+      "Leadership",
+      "Communication",
+      "Problem Solving",
     ];
 
-    const foundSkills = commonSkills.filter(skill => 
-      text.toLowerCase().includes(skill.toLowerCase())
+    const foundSkills = commonSkills.filter((skill) =>
+      text.toLowerCase().includes(skill.toLowerCase()),
     );
 
     return foundSkills;
@@ -110,7 +151,7 @@ export class ATSService {
     const experiencePatterns = [
       /(\d+)\+?\s*years?\s*of\s*experience/gi,
       /experience:\s*(\d+)\+?\s*years?/gi,
-      /(\d+)\+?\s*years?\s*in\s*the\s*field/gi
+      /(\d+)\+?\s*years?\s*in\s*the\s*field/gi,
     ];
 
     for (const pattern of experiencePatterns) {
@@ -127,12 +168,21 @@ export class ATSService {
   // Extract education from resume text
   private static extractEducation(text: string): string[] {
     const educationKeywords = [
-      'Bachelor', 'Master', 'PhD', 'MBA', 'BSc', 'MSc', 'PhD',
-      'Computer Science', 'Engineering', 'Business', 'Mathematics'
+      "Bachelor",
+      "Master",
+      "PhD",
+      "MBA",
+      "BSc",
+      "MSc",
+      "PhD",
+      "Computer Science",
+      "Engineering",
+      "Business",
+      "Mathematics",
     ];
 
-    const foundEducation = educationKeywords.filter(edu => 
-      text.toLowerCase().includes(edu.toLowerCase())
+    const foundEducation = educationKeywords.filter((edu) =>
+      text.toLowerCase().includes(edu.toLowerCase()),
     );
 
     return foundEducation;
@@ -141,12 +191,21 @@ export class ATSService {
   // Extract certifications from resume text
   private static extractCertifications(text: string): string[] {
     const certificationKeywords = [
-      'AWS', 'Azure', 'Google Cloud', 'PMP', 'Scrum Master', 'Agile',
-      'CISSP', 'CompTIA', 'Microsoft', 'Oracle', 'Cisco'
+      "AWS",
+      "Azure",
+      "Google Cloud",
+      "PMP",
+      "Scrum Master",
+      "Agile",
+      "CISSP",
+      "CompTIA",
+      "Microsoft",
+      "Oracle",
+      "Cisco",
     ];
 
-    const foundCertifications = certificationKeywords.filter(cert => 
-      text.toLowerCase().includes(cert.toLowerCase())
+    const foundCertifications = certificationKeywords.filter((cert) =>
+      text.toLowerCase().includes(cert.toLowerCase()),
     );
 
     return foundCertifications;
@@ -155,12 +214,21 @@ export class ATSService {
   // Extract languages from resume text
   private static extractLanguages(text: string): string[] {
     const languageKeywords = [
-      'English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese',
-      'Korean', 'Arabic', 'Russian', 'Portuguese', 'Italian'
+      "English",
+      "Spanish",
+      "French",
+      "German",
+      "Chinese",
+      "Japanese",
+      "Korean",
+      "Arabic",
+      "Russian",
+      "Portuguese",
+      "Italian",
     ];
 
-    const foundLanguages = languageKeywords.filter(lang => 
-      text.toLowerCase().includes(lang.toLowerCase())
+    const foundLanguages = languageKeywords.filter((lang) =>
+      text.toLowerCase().includes(lang.toLowerCase()),
     );
 
     return foundLanguages;
@@ -169,20 +237,30 @@ export class ATSService {
   // Extract soft skills from resume text
   private static extractSoftSkills(text: string): string[] {
     const softSkills = [
-      'Communication', 'Leadership', 'Teamwork', 'Problem Solving',
-      'Critical Thinking', 'Adaptability', 'Time Management',
-      'Creativity', 'Collaboration', 'Interpersonal Skills'
+      "Communication",
+      "Leadership",
+      "Teamwork",
+      "Problem Solving",
+      "Critical Thinking",
+      "Adaptability",
+      "Time Management",
+      "Creativity",
+      "Collaboration",
+      "Interpersonal Skills",
     ];
 
-    const foundSoftSkills = softSkills.filter(skill => 
-      text.toLowerCase().includes(skill.toLowerCase())
+    const foundSoftSkills = softSkills.filter((skill) =>
+      text.toLowerCase().includes(skill.toLowerCase()),
     );
 
     return foundSoftSkills;
   }
 
   // Calculate skills match percentage
-  private static calculateSkillsMatch(resume: Resume, jobRequirements: ATSJobRequirements): number {
+  private static calculateSkillsMatch(
+    resume: Resume,
+    jobRequirements: ATSJobRequirements,
+  ): number {
     const resumeSkills = resume.skills || [];
     const requiredSkills = jobRequirements.required_skills || [];
     const preferredSkills = jobRequirements.preferred_skills || [];
@@ -192,22 +270,24 @@ export class ATSService {
 
     // Calculate required skills match
     if (requiredSkills.length > 0) {
-      const matchedRequired = requiredSkills.filter(skill =>
-        resumeSkills.some(resumeSkill => 
-          resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
-          skill.toLowerCase().includes(resumeSkill.toLowerCase())
-        )
+      const matchedRequired = requiredSkills.filter((skill) =>
+        resumeSkills.some(
+          (resumeSkill) =>
+            resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
+            skill.toLowerCase().includes(resumeSkill.toLowerCase()),
+        ),
       );
       requiredMatch = (matchedRequired.length / requiredSkills.length) * 100;
     }
 
     // Calculate preferred skills match
     if (preferredSkills.length > 0) {
-      const matchedPreferred = preferredSkills.filter(skill =>
-        resumeSkills.some(resumeSkill => 
-          resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
-          skill.toLowerCase().includes(resumeSkill.toLowerCase())
-        )
+      const matchedPreferred = preferredSkills.filter((skill) =>
+        resumeSkills.some(
+          (resumeSkill) =>
+            resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
+            skill.toLowerCase().includes(resumeSkill.toLowerCase()),
+        ),
       );
       preferredMatch = (matchedPreferred.length / preferredSkills.length) * 50;
     }
@@ -216,7 +296,10 @@ export class ATSService {
   }
 
   // Calculate experience match percentage
-  private static calculateExperienceMatch(resume: Resume, jobRequirements: ATSJobRequirements): number {
+  private static calculateExperienceMatch(
+    resume: Resume,
+    jobRequirements: ATSJobRequirements,
+  ): number {
     const resumeExperience = resume.experience_years || 0;
     const requiredExperience = jobRequirements.experience_required || 0;
 
@@ -232,7 +315,10 @@ export class ATSService {
   }
 
   // Calculate education match percentage
-  private static calculateEducationMatch(resume: Resume, jobRequirements: ATSJobRequirements): number {
+  private static calculateEducationMatch(
+    resume: Resume,
+    jobRequirements: ATSJobRequirements,
+  ): number {
     const resumeEducation = resume.education || [];
     const requiredEducation = jobRequirements.education_required || [];
 
@@ -240,80 +326,96 @@ export class ATSService {
       return 100; // No education requirements
     }
 
-    const matchedEducation = requiredEducation.filter(edu =>
-      resumeEducation.some(resumeEdu => 
-        resumeEdu.toLowerCase().includes(edu.toLowerCase()) ||
-        edu.toLowerCase().includes(resumeEdu.toLowerCase())
-      )
+    const matchedEducation = requiredEducation.filter((edu) =>
+      resumeEducation.some(
+        (resumeEdu) =>
+          resumeEdu.toLowerCase().includes(edu.toLowerCase()) ||
+          edu.toLowerCase().includes(resumeEdu.toLowerCase()),
+      ),
     );
 
-    return Math.round((matchedEducation.length / requiredEducation.length) * 100);
+    return Math.round(
+      (matchedEducation.length / requiredEducation.length) * 100,
+    );
   }
 
   // Generate experience summary
   private static generateExperienceSummary(resume: Resume): string {
     const years = resume.experience_years || 0;
     const skills = resume.skills || [];
-    
+
     if (years > 0) {
-      return `${years}+ years of experience in ${skills.slice(0, 3).join(', ')}`;
+      return `${years}+ years of experience in ${skills.slice(0, 3).join(", ")}`;
     }
-    
-return 'Experience details available in resume';
+
+    return "Experience details available in resume";
   }
 
   // Generate education summary
   private static generateEducationSummary(resume: Resume): string {
     const education = resume.education || [];
-    
+
     if (education.length > 0) {
-      return education.join(', ');
+      return education.join(", ");
     }
-    
-return 'Education details available in resume';
+
+    return "Education details available in resume";
   }
 
   // Generate recommendations based on job requirements
-  private static generateRecommendations(resume: Resume, jobRequirements: ATSJobRequirements): string[] {
+  private static generateRecommendations(
+    resume: Resume,
+    jobRequirements: ATSJobRequirements,
+  ): string[] {
     const recommendations: string[] = [];
     const resumeSkills = resume.skills || [];
     const requiredSkills = jobRequirements.required_skills || [];
-    const missingSkills = requiredSkills.filter(skill =>
-      !resumeSkills.some(resumeSkill => 
-        resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
-        skill.toLowerCase().includes(resumeSkill.toLowerCase())
-      )
+    const missingSkills = requiredSkills.filter(
+      (skill) =>
+        !resumeSkills.some(
+          (resumeSkill) =>
+            resumeSkill.toLowerCase().includes(skill.toLowerCase()) ||
+            skill.toLowerCase().includes(resumeSkill.toLowerCase()),
+        ),
     );
 
     if (missingSkills.length > 0) {
-      recommendations.push(`Add missing required skills: ${missingSkills.join(', ')}`);
+      recommendations.push(
+        `Add missing required skills: ${missingSkills.join(", ")}`,
+      );
     }
 
     if (resume.experience_years && jobRequirements.experience_required) {
       if (resume.experience_years < jobRequirements.experience_required) {
-        recommendations.push(`Highlight relevant experience to meet ${jobRequirements.experience_required} years requirement`);
+        recommendations.push(
+          `Highlight relevant experience to meet ${jobRequirements.experience_required} years requirement`,
+        );
       }
     }
 
     if (resume.education && jobRequirements.education_required) {
-      const missingEducation = jobRequirements.education_required.filter(edu =>
-        !resume?.education?.some(resumeEdu => 
-          resumeEdu.toLowerCase().includes(edu.toLowerCase()) ||
-          edu.toLowerCase().includes(resumeEdu.toLowerCase())
-        )
+      const missingEducation = jobRequirements.education_required.filter(
+        (edu) =>
+          !resume?.education?.some(
+            (resumeEdu) =>
+              resumeEdu.toLowerCase().includes(edu.toLowerCase()) ||
+              edu.toLowerCase().includes(resumeEdu.toLowerCase()),
+          ),
       );
-      
+
       if (missingEducation.length > 0) {
-        recommendations.push(`Consider adding education requirements: ${missingEducation.join(', ')}`);
+        recommendations.push(
+          `Consider adding education requirements: ${missingEducation.join(", ")}`,
+        );
       }
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Resume matches job requirements well');
-      recommendations.push('Consider adding quantifiable achievements');
-      recommendations.push('Highlight relevant project experience');
+      recommendations.push("Resume matches job requirements well");
+      recommendations.push("Consider adding quantifiable achievements");
+      recommendations.push("Highlight relevant project experience");
     }
 
     return recommendations;
   }
-} 
+}

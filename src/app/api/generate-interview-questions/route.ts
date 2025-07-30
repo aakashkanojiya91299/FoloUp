@@ -114,8 +114,8 @@ export async function POST(request: NextRequest) {
 
     if (error.status === 400) {
       console.error("Error generating interview questions:", error);
-      
-return NextResponse.json(
+
+      return NextResponse.json(
         {
           error: "Invalid request to AI service. Please check your input.",
         },

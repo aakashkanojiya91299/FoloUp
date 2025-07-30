@@ -35,7 +35,6 @@ function SideMenu() {
             <SpeechIcon className="font-thin mr-2" />
             <p className="font-medium ">Interviewers</p>
           </div>
-
         </div>
       </div>
     </div>

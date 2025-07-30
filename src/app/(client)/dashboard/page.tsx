@@ -99,7 +99,7 @@ function Interviews() {
         <h3 className=" text-sm tracking-tight text-gray-600 font-medium ">
           Start getting responses now!
         </h3>
-        
+
         {/* ATS Candidates Section */}
         <div className="mt-8 mb-6">
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
@@ -110,9 +110,12 @@ function Interviews() {
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">ATS Candidate Management</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      ATS Candidate Management
+                    </h3>
                     <p className="text-sm text-gray-600">
-                      Upload resumes and analyze candidates against interview job descriptions
+                      Upload resumes and analyze candidates against interview
+                      job descriptions
                     </p>
                   </div>
                 </div>
@@ -189,8 +192,8 @@ function Interviews() {
                     </div>
                     <p className="text-l text-center">
                       Contact{" "}
-                      <span className="font-semibold">info@stspl.com</span>{" "}
-                      to upgrade your plan.
+                      <span className="font-semibold">info@stspl.com</span> to
+                      upgrade your plan.
                     </p>
                   </div>
                 </Modal>
