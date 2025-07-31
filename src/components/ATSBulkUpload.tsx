@@ -260,7 +260,7 @@ export default function ATSBulkUpload({
                 return {
                   ...result,
                   candidateName,
-                  error: "Contact information not found in resume",
+                  error: "Could not extract contact information from resume. Please ensure the resume contains valid contact details.",
                   noContactInfo: true
                 };
               }
@@ -474,8 +474,8 @@ export default function ATSBulkUpload({
           ) : (
             <Alert>
               <AlertDescription>
-                  No job description found for this interview. Please add a job
-                  description to enable ATS matching.
+                No job description found for this interview. Please add a job
+                description to enable ATS matching.
               </AlertDescription>
             </Alert>
           )}
@@ -519,8 +519,8 @@ export default function ATSBulkUpload({
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${isDragActive
-                  ? "border-blue-400 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400"
+                ? "border-blue-400 bg-blue-50"
+                : "border-gray-300 hover:border-gray-400"
                 }`}
             >
               <input {...getInputProps()} />
@@ -695,19 +695,19 @@ export default function ATSBulkUpload({
                   ) : result.result ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
-                            Match Score:
-                          </span>
-                          <span
-                            className={`font-bold ${getScoreColor(result.result.match_score)}`}
-                          >
+                        <span className="text-sm font-medium">
+                          Match Score:
+                        </span>
+                        <span
+                          className={`font-bold ${getScoreColor(result.result.match_score)}`}
+                        >
                           {result.result.match_score}%
                         </span>
                       </div>
 
-                        {Array.isArray(result.result.missing_skills) &&
-                          result.result.missing_skills.length > 0 && (
-                            <div>
+                      {Array.isArray(result.result.missing_skills) &&
+                        result.result.missing_skills.length > 0 && (
+                          <div>
                             <span className="text-sm font-medium">
                               Missing Skills:
                             </span>
@@ -723,16 +723,16 @@ export default function ATSBulkUpload({
                                   </Badge>
                                 ),
                               )}
-                              </div>
                             </div>
-                          )}
+                          </div>
+                        )}
 
                       {result.result.feedback && (
                         <div>
                           <span className="text-sm font-medium">Feedback:</span>
-                            <p className="text-sm text-gray-600 mt-1">
-                              {result.result.feedback}
-                            </p>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {result.result.feedback}
+                          </p>
                         </div>
                       )}
                     </div>
