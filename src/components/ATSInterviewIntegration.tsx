@@ -113,6 +113,20 @@ export default function ATSInterviewIntegration({
       // First extract contact information from resume
       const contactInfo = await atsService.extractContactInfo(resumeFile);
 
+      // Check if contact information was found
+      const isContactInfoFound = (
+        contactInfo.name && contactInfo.name !== "not found" &&
+        contactInfo.email && contactInfo.email !== "not found"
+      );
+
+      if (!isContactInfoFound) {
+        console.log("Contact information not found, skipping analytics");
+        setError(
+          "Could not extract contact information from resume. Please ensure the resume contains valid contact details.",
+        );
+        return;
+      }
+
       // Use extracted contact info with fallback to filename
       const finalCandidateInfo = {
         name:

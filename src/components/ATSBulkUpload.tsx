@@ -43,6 +43,7 @@ interface BulkUploadResult {
     feedback: string;
   };
   error?: string;
+  noContactInfo?: boolean; // Flag to indicate no contact info was found
 }
 
 interface Interview {
@@ -237,12 +238,30 @@ export default function ATSBulkUpload({
               const contactInfo = await atsService.extractContactInfo(
                 resumeFileWithPreview.file,
               );
-              if (
-                contactInfo.name &&
-                contactInfo.name !== "not found" &&
-                contactInfo.name.trim() !== ""
-              ) {
-                candidateName = contactInfo.name;
+
+              // Check if contact information was found
+              const isContactInfoFound = (
+                contactInfo.name && contactInfo.name !== "not found" &&
+                contactInfo.email && contactInfo.email !== "not found"
+              );
+
+              if (isContactInfoFound) {
+                if (
+                  contactInfo.name &&
+                  contactInfo.name !== "not found" &&
+                  contactInfo.name.trim() !== ""
+                ) {
+                  candidateName = contactInfo.name;
+                }
+              } else {
+                console.log(`Contact information not found for ${result.file}, skipping analytics`);
+                // Mark this result as having no contact info
+                return {
+                  ...result,
+                  candidateName,
+                  error: "Contact information not found in resume",
+                  noContactInfo: true
+                };
               }
             } catch (error) {
               console.warn(
@@ -265,7 +284,8 @@ export default function ATSBulkUpload({
       // Save successful candidates to database
       const successfulCandidates = [];
       for (const result of resultsWithNames) {
-        if (result.result && !result.error) {
+        // Skip candidates with no contact info or errors
+        if (result.result && !result.error && !result.noContactInfo) {
           // Find the corresponding file to extract contact info
           const resumeFileWithPreview = resumeFiles.find(
             (fileWithPreview) => fileWithPreview?.file?.name === result.file,
@@ -312,6 +332,8 @@ export default function ATSBulkUpload({
           if (savedCandidate) {
             successfulCandidates.push(savedCandidate);
           }
+        } else if (result.noContactInfo) {
+          console.log(`Skipping database save for ${result.file} - no contact info found`);
         }
       }
 
@@ -655,6 +677,8 @@ export default function ATSBulkUpload({
                     </div>
                     {result.error ? (
                       <Badge variant="destructive">Error</Badge>
+                    ) : result.noContactInfo ? (
+                      <Badge variant="secondary">No Contact Info</Badge>
                     ) : (
                       getScoreBadge(result?.result?.match_score || 0)
                     )}
@@ -662,6 +686,10 @@ export default function ATSBulkUpload({
 
                   {result.error ? (
                     <div className="text-red-600 text-sm">{result.error}</div>
+                  ) : result.noContactInfo ? (
+                    <div className="text-amber-600 text-sm">
+                      Contact information not found in resume. Analytics skipped.
+                    </div>
                   ) : result.result ? (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
