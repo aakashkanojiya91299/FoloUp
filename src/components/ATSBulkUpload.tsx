@@ -256,6 +256,7 @@ export default function ATSBulkUpload({
               } else {
                 console.log(`Contact information not found for ${result.file}, skipping analytics`);
                 // Mark this result as having no contact info
+
                 return {
                   ...result,
                   candidateName,
@@ -274,6 +275,7 @@ export default function ATSBulkUpload({
           return {
             ...result,
             candidateName,
+            noContactInfo: false, // Add default value for all results
           };
         }),
       );

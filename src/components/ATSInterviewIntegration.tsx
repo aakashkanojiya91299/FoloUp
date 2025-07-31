@@ -124,6 +124,7 @@ export default function ATSInterviewIntegration({
         setError(
           "Could not extract contact information from resume. Please ensure the resume contains valid contact details.",
         );
+
         return;
       }
 
