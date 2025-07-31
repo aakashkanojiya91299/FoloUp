@@ -8,6 +8,17 @@ export async function extractContactInfo(
   try {
     console.log("Extracting contact information from resume");
 
+    // Check if resumeText is empty or contains no meaningful content
+    const trimmedText = resumeText.trim();
+    if (!trimmedText || trimmedText.length === 0) {
+      console.log("Resume text is empty, returning 'not found' for all fields");
+      return {
+        name: "not found",
+        email: "not found",
+        phone: "not found"
+      };
+    }
+
     const apiKey = process.env.GEMINI_API_KEY ?? "your-api-key-here";
 
     if (!apiKey) {
@@ -17,23 +28,29 @@ export async function extractContactInfo(
     const prompt = `
   Act as a resume parser. Extract the candidate's contact information from the resume text below.
   
+  IMPORTANT: If the resume text is empty, blank, or contains no meaningful content, return "not found" for all fields.
+
   Extract the following information:
   1. Full Name (first and last name)
   2. Email address
   3. Phone number (if available)
 
   Here is the Resume text:
-  ${resumeText}
+  ${trimmedText}
 
   Respond strictly in the following JSON format:
   {
     "name": "John Doe",
-    "email": "john.doe@email.com",
+    "email": "john.doe@email.com", 
     "phone": "+1-555-123-4567"
   }
 
-  If any information is missing or unclear, use "not found" for that field.
-  Only extract information that is clearly present in the resume.
+  CRITICAL RULES:
+  - If any information is missing or unclear, use "not found" for that field
+  - If the resume text is empty or contains no meaningful content, return "not found" for ALL fields
+  - Only extract information that is clearly present in the resume
+  - Do NOT use placeholder or example values like "John Doe" unless they are actually in the resume
+  - If you cannot find real information, use "not found" instead of making up data
     `.trim();
 
     const response = await axios.post(
@@ -66,7 +83,29 @@ export async function extractContactInfo(
       .replace(/^```\n?/, "")
       .replace(/```$/, "");
 
-    return JSON.parse(text);
+    const parsedResult = JSON.parse(text);
+
+    // Validate the response to ensure we don't return placeholder values
+    const isPlaceholderResponse = (
+      parsedResult.name === "John Doe" ||
+      parsedResult.email === "john.doe@email.com" ||
+      parsedResult.phone === "+1-555-123-4567" ||
+      parsedResult.name === "Jane Doe" ||
+      parsedResult.email === "jane.doe@email.com" ||
+      parsedResult.phone === "+1-555-123-4568"
+    );
+
+    // If the text is empty or the AI returned placeholder values, return "not found"
+    if (!trimmedText || trimmedText.length === 0 || isPlaceholderResponse) {
+      console.log("Detected empty text or placeholder response, returning 'not found'");
+      return {
+        name: "not found",
+        email: "not found",
+        phone: "not found"
+      };
+    }
+
+    return parsedResult;
   } catch (error: any) {
     console.error("Gemini API error:", error?.response?.data || error.message);
     return {
