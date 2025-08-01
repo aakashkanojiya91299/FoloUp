@@ -32,6 +32,7 @@
     "env:validate": "node -e \"require('dotenv').config({path: '.env'}); console.log('Next.js env loaded:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_') || k.includes('API_KEY') || k.includes('SUPABASE')).length, 'variables')\"",
     "env:setup:prod": "cp env.production.example .env && cp ATS-System/env.example ATS-System/.env && echo 'Production environment files created. Please edit .env and ATS-System/.env with your production values.'",
     "deploy:prod": "./deploy-production.sh",
+    "deploy:prod:js": "node deploy-production.js",
     "deploy:prod:npm": "npm run setup:all && npm run build:all && pm2 stop ecosystem.config.js 2>/dev/null || true && pm2 delete ecosystem.config.js 2>/dev/null || true && pm2 start ecosystem.config.js --env production && pm2 save && pm2 startup",
     "pm2:start:prod": "pm2 start ecosystem.config.js --env production",
     "pm2:reload:prod": "pm2 reload ecosystem.config.js --env production",

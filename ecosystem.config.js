@@ -59,7 +59,7 @@ module.exports = {
       },
       env_production: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 4000
       },
       error_file: './logs/foloup-ats-error.log',
       out_file: './logs/foloup-ats-out.log',

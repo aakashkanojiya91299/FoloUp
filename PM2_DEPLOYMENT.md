@@ -189,8 +189,10 @@ npm run env:setup:prod
 nano .env
 nano ATS-System/.env
 
-# Deploy to production
-npm run deploy:prod
+# Deploy to production (choose one method)
+npm run deploy:prod      # Shell script (may have permission issues)
+npm run deploy:prod:js   # Node.js script (recommended)
+npm run deploy:prod:npm  # Pure npm commands
 ```
 
 ### **Production Commands**
