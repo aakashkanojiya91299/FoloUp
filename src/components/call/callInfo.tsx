@@ -59,25 +59,58 @@ function CallInfo({
   const [candidateStatus, setCandidateStatus] = useState<string>("");
   const [interviewId, setInterviewId] = useState<string>("");
   const [tabSwitchCount, setTabSwitchCount] = useState<number>();
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
+  const [aiTestResult, setAiTestResult] = useState<any>(null);
+
+  const testAIService = async () => {
+    try {
+      const response = await fetch('/api/test-ai');
+      const result = await response.json();
+      setAiTestResult(result);
+      console.log('AI Test Result:', result);
+    } catch (error: any) {
+      console.error('AI Test failed:', error);
+      setAiTestResult({ success: false, error: error.message });
+    }
+  };
+
+  const fetchResponses = async () => {
+    setIsLoading(true);
+    setCall(undefined);
+    setEmail("");
+    setName("");
+    setAnalyticsLoading(true);
+
+    try {
+      const response = await axios.post("/api/get-call", { id: call_id });
+      console.log("API Response:", response.data);
+      setCall(response.data.callResponse);
+      setAnalytics(response.data.analytics);
+      setDebugInfo(response.data);
+      setAnalyticsLoading(false);
+
+      // Log analytics data for debugging
+      if (response.data.analytics) {
+        console.log("Analytics data received:", response.data.analytics);
+        console.log("Overall score:", response.data.analytics.overallScore);
+      } else {
+        console.log("No analytics data received");
+      }
+
+      // Log any error from the API
+      if (response.data.error) {
+        console.error("Analytics generation error:", response.data.error);
+      }
+    } catch (error: any) {
+      console.error("Error fetching call data:", error);
+      setAnalyticsLoading(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchResponses = async () => {
-      setIsLoading(true);
-      setCall(undefined);
-      setEmail("");
-      setName("");
-
-      try {
-        const response = await axios.post("/api/get-call", { id: call_id });
-        setCall(response.data.callResponse);
-        setAnalytics(response.data.analytics);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchResponses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [call_id]);
@@ -92,7 +125,7 @@ function CallInfo({
         setCandidateStatus(response.candidate_status);
         setInterviewId(response.interview_id);
         setTabSwitchCount(response.tab_switch_count);
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
       } finally {
         setIsLoading(false);
@@ -143,7 +176,7 @@ function CallInfo({
 
         duration: 3000,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting response:", error);
 
       toast.error("Failed to delete the response.", {
@@ -331,6 +364,75 @@ function CallInfo({
                   </div>
                 </div>
               )}
+
+                {/* Loading state for Overall Hiring Score */}
+                {analyticsLoading && !analytics?.overallScore && (
+                  <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-slate-50">
+                    <div className="flex flex-row gap-2 align-middle">
+                      <div className="w-28 h-28 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]"></div>
+                      </div>
+                      <p className="font-medium my-auto text-xl">
+                        Generating Score...
+                      </p>
+                    </div>
+                    <div className="">
+                      <div className="font-medium">
+                        <span className="font-normal">Status: </span>
+                        <Skeleton className="w-[200px] h-[20px] inline-block" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!analytics?.overallScore && !analyticsLoading && (
+                  <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-red-50 border border-red-200">
+                    <div className="flex flex-row gap-2 align-middle">
+                      <div className="w-28 h-28 flex items-center justify-center">
+                        <span className="text-red-500 text-2xl">⚠️</span>
+                      </div>
+                      <p className="font-medium my-auto text-xl text-red-700">
+                        Analytics Unavailable
+                      </p>
+                    </div>
+                    <div className="">
+                      <div className="font-medium text-red-600">
+                        <span className="font-normal">Reason: </span>
+                        AI analysis failed. Please check your API configuration or try again later.
+                      </div>
+                      <button
+                        onClick={() => {
+                          setAnalyticsLoading(true);
+                          fetchResponses();
+                        }}
+                        className="mt-2 px-4 py-2 bg-[#06546e] text-white rounded-lg hover:bg-[#054a5e] transition-colors"
+                      >
+                        Retry Analysis
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading state for Communication Score */}
+                {analyticsLoading && !analytics?.communication && (
+                  <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-slate-50">
+                    <div className="flex flex-row gap-2 align-middle">
+                      <div className="w-28 h-28 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]"></div>
+                      </div>
+                      <p className="font-medium my-auto text-xl">
+                        Analyzing Communication...
+                      </p>
+                    </div>
+                    <div className="">
+                      <div className="font-medium">
+                        <span className="font-normal">Status: </span>
+                        <Skeleton className="w-[200px] h-[20px] inline-block" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               {analytics?.communication && (
                 <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-slate-50">
                   <div className="flex flex-row gap-2 align-middle">
@@ -436,6 +538,36 @@ function CallInfo({
               />
             </ScrollArea>
           </div>
+
+            {/* Debug Section - Only show in development */}
+            {process.env.NODE_ENV === 'development' && debugInfo && (
+              <div className="bg-yellow-100 rounded-2xl min-h-[120px] p-4 px-5 mb-[150px] border border-yellow-300">
+                <p className="font-semibold my-2 mb-4 text-yellow-800">Debug Information</p>
+                <div className="text-sm space-y-2">
+                  <div>
+                    <strong>Analytics Object:</strong> {analytics ? 'Present' : 'Missing'}
+                  </div>
+                  <div>
+                    <strong>Overall Score:</strong> {analytics?.overallScore ?? 'undefined'}
+                  </div>
+                  <div>
+                    <strong>Is Analysed:</strong> {debugInfo.is_analysed ? 'Yes' : 'No'}
+                  </div>
+                  <div>
+                    <strong>API Error:</strong> {debugInfo.error || 'None'}
+                  </div>
+                  <div>
+                    <strong>Call ID:</strong> {call_id}
+                  </div>
+                  <div>
+                    <strong>Analytics Keys:</strong> {analytics ? Object.keys(analytics).join(', ') : 'No analytics'}
+                  </div>
+                  <div>
+                    <strong>AI Test Result:</strong> {JSON.stringify(aiTestResult)}
+                  </div>
+                </div>
+              </div>
+            )}
         </>
       )}
     </div>

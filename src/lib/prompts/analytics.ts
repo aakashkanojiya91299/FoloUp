@@ -59,4 +59,6 @@ Ensure the output is in valid JSON format with the following structure:
   "softSkillSummary: string
 }
 
-IMPORTANT: Only use the main questions provided. Do not generate or infer additional questions such as follow-up questions.`;
+IMPORTANT: Only use the main questions provided. Do not generate or infer additional questions such as follow-up questions.
+
+CRITICAL: Return ONLY valid JSON without any markdown formatting, code blocks, or additional text. The response must be parseable JSON that starts with { and ends with }.`;

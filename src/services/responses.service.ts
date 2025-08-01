@@ -144,6 +144,22 @@ const updateResponse = async (payload: any, call_id: string) => {
   return data;
 };
 
+const resetAnalytics = async (call_id: string) => {
+  const { error, data } = await supabase
+    .from("response")
+    .update({
+      analytics: null,
+      is_analysed: false
+    })
+    .eq("call_id", call_id);
+  if (error) {
+    console.log(error);
+    return [];
+  }
+
+  return data;
+};
+
 export const ResponseService = {
   createResponse,
   saveResponse,
@@ -153,4 +169,5 @@ export const ResponseService = {
   deleteResponse,
   getResponseCountByOrganizationId,
   getAllEmails: getAllEmailAddressesForInterview,
+  resetAnalytics,
 };
