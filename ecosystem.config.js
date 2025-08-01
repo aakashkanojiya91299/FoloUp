@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'foloup-nextjs',
-      script: 'npm',
+      script: 'node_modules/.bin/next',
       args: 'start',
       cwd: './',
       instances: 'max', // Use all available CPU cores
@@ -41,8 +41,7 @@ module.exports = {
     },
     {
       name: 'foloup-ats',
-      script: 'npm',
-      args: 'start',
+      script: './ATS-System/dist/server.js',
       cwd: './ATS-System',
       instances: 'max', // Use all available CPU cores
       exec_mode: 'cluster', // Enable clustering for better performance
@@ -52,7 +51,7 @@ module.exports = {
       env_file: './ATS-System/.env',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 4000,
       },
       env_development: {
         NODE_ENV: 'development',
