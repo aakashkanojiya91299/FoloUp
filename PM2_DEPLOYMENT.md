@@ -22,12 +22,12 @@ This guide explains how to deploy and manage the FoloUp application using PM2 pr
 4. **Configure environment files:**
    ```bash
    # Copy example environment files
-   cp env.example .env.local
-   cp ATS-System/env.example ATS-System/.env.local
+   cp env.example .env
+   cp ATS-System/env.example ATS-System/.env
    
    # Edit the files with your actual values
-   nano .env.local
-   nano ATS-System/.env.local
+   nano .env
+   nano ATS-System/.env
    ```
 
 ## 🚀 PM2 Commands
@@ -108,12 +108,12 @@ npm run pm2:monit
 ### **Environment Files Configuration**
 PM2 automatically loads environment variables from the specified `env_file` in the ecosystem config:
 
-- **Next.js App:** `./.env.local`
-- **ATS System:** `./ATS-System/.env.local`
+- **Next.js App:** `./.env`
+- **ATS System:** `./ATS-System/.env`
 
 ### **Required Environment Variables**
 
-#### **Next.js Application (.env.local)**
+#### **Next.js Application (.env)**
 ```bash
 # Database Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
@@ -132,7 +132,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
 CLERK_SECRET_KEY=your_clerk_secret_key_here
 ```
 
-#### **ATS System (ATS-System/.env.local)**
+#### **ATS System (ATS-System/.env)**
 ```bash
 # Database Configuration
 DATABASE_URL=your_database_url_here
@@ -152,12 +152,12 @@ BASE_URL=http://localhost:3001
 ### **Environment File Setup**
 ```bash
 # Copy example files
-cp env.example .env.local
-cp ATS-System/env.example ATS-System/.env.local
+cp env.example .env
+cp ATS-System/env.example ATS-System/.env
 
 # Edit with your values
-nano .env.local
-nano ATS-System/.env.local
+nano .env
+nano ATS-System/.env
 
 # Verify environment files are loaded
 pm2 env foloup-nextjs
@@ -165,10 +165,85 @@ pm2 env foloup-ats
 ```
 
 ### **Environment File Security**
-- **Never commit `.env.local` files to version control**
+- **Never commit `.env` files to version control**
 - **Use different environment files for different environments**
 - **Rotate API keys regularly**
 - **Use strong, unique secrets for each environment**
+
+## 📈 Production Deployment
+
+### **Production Ecosystem Features**
+- **Clustering:** Uses all available CPU cores for maximum performance
+- **Memory Management:** 2GB memory limit with automatic restart
+- **Security:** Enhanced security settings and monitoring
+- **Logging:** Comprehensive logging with rotation
+- **Monitoring:** Built-in performance monitoring
+- **Auto-restart:** Robust restart policies with delays
+
+### **Production Environment Setup**
+```bash
+# Setup production environment files
+npm run env:setup:prod
+
+# Edit production environment files
+nano .env
+nano ATS-System/.env
+
+# Deploy to production
+npm run deploy:prod
+```
+
+### **Production Commands**
+```bash
+# Start with production environment
+npm run pm2:start:prod
+
+# Reload with zero downtime
+npm run pm2:reload:prod
+
+# Restart applications
+npm run pm2:restart:prod
+
+# Save PM2 configuration
+npm run pm2:save
+
+# Setup PM2 startup script
+npm run pm2:startup
+```
+
+### **Production Monitoring**
+```bash
+# View real-time monitoring
+pm2 monit
+
+# Check application status
+pm2 status
+
+# View production logs
+pm2 logs --lines 100
+
+# Monitor resource usage
+pm2 show foloup-nextjs
+pm2 show foloup-ats
+```
+
+### **Production Security Checklist**
+- [ ] Environment variables are properly set
+- [ ] API keys are production-grade
+- [ ] Database connections are secure
+- [ ] HTTPS is configured
+- [ ] Rate limiting is enabled
+- [ ] Monitoring is active
+- [ ] Logs are being rotated
+- [ ] Backup strategy is in place
+
+### **Production Performance Optimization**
+- **Clustering:** Applications run on multiple CPU cores
+- **Memory Management:** 2GB limit with automatic restart
+- **Caching:** Enable application-level caching
+- **CDN:** Use CDN for static assets
+- **Database:** Optimize database connections
+- **Monitoring:** Real-time performance monitoring
 
 ## 🔧 Environment Configuration
 
