@@ -12,7 +12,7 @@ import { ClientProvider } from "@/contexts/clients.context";
 
 const queryClient = new QueryClient();
 
-const providers = ({ children }: ThemeProviderProps) => {
+function providers({ children }: ThemeProviderProps) {
   const Provider = compose([
     InterviewProvider,
     InterviewerProvider,
@@ -27,11 +27,10 @@ const providers = ({ children }: ThemeProviderProps) => {
       </QueryClientProvider>
     </NextThemesProvider>
   );
-};
+}
 
 // Simplified providers for user routes (no Clerk dependencies)
-const UserProviders = ({ children }: ThemeProviderProps) => {
-
+function UserProviders({ children }: ThemeProviderProps) {
   return (
     <NextThemesProvider attribute="class" defaultTheme="light">
       <QueryClientProvider client={queryClient}>
@@ -41,7 +40,7 @@ const UserProviders = ({ children }: ThemeProviderProps) => {
       </QueryClientProvider>
     </NextThemesProvider>
   );
-};
+}
 
 export default providers;
 export { UserProviders };
