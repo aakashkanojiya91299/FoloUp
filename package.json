@@ -10,8 +10,10 @@
     "ats:install": "cd ATS-System && npm install",
     "ats:start": "cd ATS-System && npm start",
     "ats:dev": "cd ATS-System && npm run start",
+    "ats:build": "cd ATS-System && npm run build",
     "dev:all": "concurrently \"npm run dev\" \"npm run ats:start\"",
     "start:all": "concurrently \"npm run start\" \"npm run ats:start\"",
+    "build:all": "npm run build && npm run ats:build",
     "setup:all": "npm install && npm run ats:install",
     "run:all": "npm run setup:all && npm run dev:all",
     "start:complete": "./run-all.sh"
