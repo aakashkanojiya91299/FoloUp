@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -70,6 +70,7 @@ export default function CandidateInterviewLinkGenerator({
 }: CandidateInterviewLinkGeneratorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
   const [expirationType, setExpirationType] = useState<
     "never" | "date" | "hours"
   >("never");
@@ -86,6 +87,35 @@ export default function CandidateInterviewLinkGenerator({
       loadExistingLinks();
     }
   }, [isOpen, candidate.id]);
+
+  // Debug effect to monitor modal state
+  useEffect(() => {
+    console.log("Modal state changed:", isOpen);
+  }, [isOpen]);
+
+  // Cleanup effect to reset modal state on unmount
+  useEffect(() => {
+    return () => {
+      setIsOpen(false);
+    };
+  }, []);
+
+  const handleOpenChange = (open: boolean) => {
+    console.log("Dialog onOpenChange called with:", open);
+    setIsOpen(open);
+  };
+
+  const closeModal = () => {
+    console.log("closeModal called");
+    setIsOpen(false);
+    // Force close after a short delay as fallback
+    setTimeout(() => {
+      if (isOpen) {
+        console.log("Force closing modal...");
+        setIsOpen(false);
+      }
+    }, 50);
+  };
 
   const loadExistingLinks = async () => {
     setIsLoadingLinks(true);
@@ -127,8 +157,12 @@ export default function CandidateInterviewLinkGenerator({
         toast.success("Interview link generated successfully!");
         setExistingLinks((prev) => [response.data.link, ...prev]);
         onLinkCreated?.(response.data.link);
-        setIsOpen(false);
+
+        // Reset form first
         resetForm();
+
+        // Close modal using the robust close function
+        closeModal();
       } else {
         toast.error("Failed to generate interview link");
       }
@@ -274,7 +308,7 @@ export default function CandidateInterviewLinkGenerator({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <LinkIcon className="h-4 w-4" />
@@ -493,7 +527,7 @@ export default function CandidateInterviewLinkGenerator({
         </div>
 
         <DialogFooter className="flex-shrink-0">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+          <Button variant="outline" onClick={closeModal}>
             Cancel
           </Button>
           <Button disabled={isLoading} onClick={generateLink}>
