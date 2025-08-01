@@ -29,4 +29,18 @@ const providers = ({ children }: ThemeProviderProps) => {
   );
 };
 
+// Simplified providers for user routes (no Clerk dependencies)
+const UserProviders = ({ children }: ThemeProviderProps) => {
+  return (
+    <NextThemesProvider attribute="class" defaultTheme="light">
+      <QueryClientProvider client={queryClient}>
+        <ResponseProvider>
+          {children}
+        </ResponseProvider>
+      </QueryClientProvider>
+    </NextThemesProvider>
+  );
+};
+
 export default providers;
+export { UserProviders };

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import Providers from "@/components/providers";
+import { UserProviders } from "@/components/providers";
 import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -37,21 +36,21 @@ export default function RootLayout({
         <link rel="icon" href="/browser-user-icon.ico" />
       </head>
       <body className={inter.className}>
-          <Providers>
-            {children}
-            <Toaster
-              toastOptions={{
-                classNames: {
-                  toast: "bg-white border-2 border-[#06546e]",
-                  title: "text-black",
-                  description: "text-red-400",
-                  actionButton: "bg-[#06546e]",
-                  cancelButton: "bg-[#f26622]",
-                  closeButton: "bg-lime-400",
-                },
-              }}
-            />
-        </Providers>
+        <UserProviders>
+          {children}
+          <Toaster
+            toastOptions={{
+              classNames: {
+                toast: "bg-white border-2 border-[#06546e]",
+                title: "text-black",
+                description: "text-red-400",
+                actionButton: "bg-[#06546e]",
+                cancelButton: "bg-[#f26622]",
+                closeButton: "bg-lime-400",
+              },
+            }}
+          />
+        </UserProviders>
       </body>
     </html>
   );

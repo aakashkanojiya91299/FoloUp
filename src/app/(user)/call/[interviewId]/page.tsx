@@ -1,6 +1,5 @@
 "use client";
 
-import { useInterviews } from "@/contexts/interviews.context";
 import { useEffect, useState } from "react";
 import Call from "@/components/call";
 import Image from "next/image";
@@ -8,6 +7,7 @@ import { ArrowUpRightSquareIcon } from "lucide-react";
 import { Interview } from "@/types/interview";
 import LoaderWithText from "@/components/loaders/loader-with-text/loaderWithText";
 import { useSearchParams } from "next/navigation";
+import { InterviewService } from "@/services/interviews.service";
 import {
   CandidateInterviewLink,
   CandidateInterviewLinkApiService,
@@ -115,7 +115,6 @@ function PopUpMessage({ title, description, image }: PopupProps) {
 function InterviewInterface({ params }: Props) {
   const [interview, setInterview] = useState<Interview>();
   const [isActive, setIsActive] = useState(true);
-  const { getInterviewById } = useInterviews();
   const [interviewNotFound, setInterviewNotFound] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
   const [isValidatingLink, setIsValidatingLink] = useState(false);
@@ -213,7 +212,7 @@ function InterviewInterface({ params }: Props) {
   useEffect(() => {
     const fetchinterview = async () => {
       try {
-        const response = await getInterviewById(params.interviewId);
+        const response = await InterviewService.getInterviewById(params.interviewId);
         if (response) {
           setInterview(response);
           document.title = response.name;
