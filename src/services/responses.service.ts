@@ -154,6 +154,7 @@ const resetAnalytics = async (call_id: string) => {
     .eq("call_id", call_id);
   if (error) {
     console.log(error);
+
     return [];
   }
 

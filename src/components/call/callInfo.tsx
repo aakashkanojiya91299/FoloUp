@@ -370,17 +370,16 @@ function CallInfo({
                   <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-slate-50">
                     <div className="flex flex-row gap-2 align-middle">
                       <div className="w-28 h-28 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]"></div>
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]">.</div>
                       </div>
                       <p className="font-medium my-auto text-xl">
                         Generating Score...
                       </p>
                     </div>
-                    <div className="">
-                      <div className="font-medium">
-                        <span className="font-normal">Status: </span>
-                        <Skeleton className="w-[200px] h-[20px] inline-block" />
-                      </div>
+                    <div className="" />
+                    <div className="font-medium">
+                      <span className="font-normal">Status: </span>
+                      <Skeleton className="w-[200px] h-[20px] inline-block" />
                     </div>
                   </div>
                 )}
@@ -401,11 +400,11 @@ function CallInfo({
                         AI analysis failed. Please check your API configuration or try again later.
                       </div>
                       <button
+                        className="mt-2 px-4 py-2 bg-[#06546e] text-white rounded-lg hover:bg-[#054a5e] transition-colors"
                         onClick={() => {
                           setAnalyticsLoading(true);
                           fetchResponses();
                         }}
-                        className="mt-2 px-4 py-2 bg-[#06546e] text-white rounded-lg hover:bg-[#054a5e] transition-colors"
                       >
                         Retry Analysis
                       </button>
@@ -418,17 +417,16 @@ function CallInfo({
                   <div className="flex flex-col gap-3 text-sm p-4 rounded-2xl bg-slate-50">
                     <div className="flex flex-row gap-2 align-middle">
                       <div className="w-28 h-28 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]"></div>
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#06546e]" />
                       </div>
                       <p className="font-medium my-auto text-xl">
                         Analyzing Communication...
                       </p>
                     </div>
-                    <div className="">
-                      <div className="font-medium">
-                        <span className="font-normal">Status: </span>
-                        <Skeleton className="w-[200px] h-[20px] inline-block" />
-                      </div>
+                    <div className="" />
+                    <div className="font-medium">
+                      <span className="font-normal">Status: </span>
+                      <Skeleton className="w-[200px] h-[20px] inline-block" />
                     </div>
                   </div>
                 )}

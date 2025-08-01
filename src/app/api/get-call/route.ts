@@ -21,6 +21,7 @@ export async function POST(req: Request, res: Response) {
   // Check if already analysed and has valid analytics
   if (callDetails.is_analysed && callDetails.analytics && callDetails.analytics.overallScore !== undefined && !body.reset) {
     logger.info("Call already analysed with valid analytics");
+
     return NextResponse.json(
       {
         callResponse,
@@ -79,6 +80,7 @@ export async function POST(req: Request, res: Response) {
   // Validate that analytics has the required fields
   if (!analytics || analytics.overallScore === undefined) {
     logger.error("Analytics generated but missing required fields:", analytics);
+
     return NextResponse.json(
       {
         callResponse,

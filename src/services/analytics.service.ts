@@ -31,6 +31,7 @@ export const generateInterviewAnalytics = async (payload: {
     // Only return existing analytics if they are valid and complete
     if (response.analytics && response.analytics.overallScore !== undefined) {
       console.log("Returning existing valid analytics");
+
       return { analytics: response.analytics as Analytics, status: 200 };
     }
 
