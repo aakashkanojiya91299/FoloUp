@@ -144,10 +144,97 @@ export default function CandidateInterviewLinkGenerator({
 
   const copyToClipboard = async (text: string) => {
     try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API not available');
+      }
+
+      // Production-specific checks for HTTP environments
+      const isProduction = process.env.NODE_ENV === 'production';
+      const isHttps = window.location.protocol === 'https:';
+
+      if (isProduction && !isHttps) {
+        console.warn('Production clipboard requires HTTPS - using fallback methods');
+        // Skip clipboard API and go directly to fallback
+        throw new Error('HTTPS required for clipboard API in production');
+      }
+
+      // Check if we have permission to write to clipboard
+      try {
+        const permission = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
+        if (permission.state === 'denied') {
+          throw new Error('Clipboard permission denied');
+        }
+        console.log('Clipboard permission state:', permission.state);
+      } catch (permissionError) {
+        console.warn('Could not check clipboard permission:', permissionError);
+        // Continue anyway - some browsers don't support permission query
+      }
+
+      // Try the modern clipboard API first
       await navigator.clipboard.writeText(text);
       toast.success("Link copied to clipboard!");
     } catch (error) {
-      toast.error("Failed to copy link");
+      console.error('Clipboard error:', error);
+      console.log('Environment:', process.env.NODE_ENV);
+      console.log('Protocol:', window.location.protocol);
+      console.log('User Agent:', navigator.userAgent);
+
+      // Fallback method using document.execCommand
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          toast.success("Link copied to clipboard!");
+        } else {
+          throw new Error('execCommand copy failed');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback clipboard error:', fallbackError);
+
+        // Production-specific fallback for HTTP environments
+        if (process.env.NODE_ENV === 'production' && window.location.protocol !== 'https:') {
+          // In production HTTP, show a more prominent message
+          toast.error("Copy failed. Please select and copy the link manually:", {
+            description: text,
+            duration: 8000,
+          });
+
+          // Try to make the text more visible for manual copy
+          const inputElement = document.querySelector('input[readonly]') as HTMLInputElement;
+          if (inputElement) {
+            inputElement.select();
+            inputElement.setSelectionRange(0, inputElement.value.length);
+            inputElement.style.backgroundColor = '#fef3c7'; // Highlight the input
+            setTimeout(() => {
+              inputElement.style.backgroundColor = '';
+            }, 3000);
+          }
+        } else {
+          // Development or HTTPS fallback
+          toast.error("Failed to copy link automatically. Please copy manually:", {
+            description: text,
+            duration: 5000,
+          });
+
+          // Also try to select the text in the input field
+          const inputElement = document.querySelector('input[readonly]') as HTMLInputElement;
+          if (inputElement) {
+            inputElement.select();
+            inputElement.setSelectionRange(0, inputElement.value.length);
+          }
+        }
+      }
     }
   };
 

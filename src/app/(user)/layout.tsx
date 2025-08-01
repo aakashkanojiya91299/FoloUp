@@ -37,7 +37,6 @@ export default function RootLayout({
         <link rel="icon" href="/browser-user-icon.ico" />
       </head>
       <body className={inter.className}>
-        <ClerkProvider>
           <Providers>
             {children}
             <Toaster
@@ -52,8 +51,7 @@ export default function RootLayout({
                 },
               }}
             />
-          </Providers>
-        </ClerkProvider>
+        </Providers>
       </body>
     </html>
   );

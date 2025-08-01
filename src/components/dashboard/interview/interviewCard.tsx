@@ -72,29 +72,84 @@ function InterviewCard({ name, interviewerId, id, url, readableSlug }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const copyToClipboard = () => {
-    navigator.clipboard
-      .writeText(
-        readableSlug ? `${base_url}/call/${readableSlug}` : (url as string),
-      )
-      .then(
-        () => {
+  const copyToClipboard = async () => {
+    const textToCopy = readableSlug ? `${base_url}/call/${readableSlug}` : (url as string);
+    
+    try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API not available');
+      }
+
+      // Production-specific checks for HTTP environments
+      const isProduction = process.env.NODE_ENV === 'production';
+      const isHttps = window.location.protocol === 'https:';
+      
+      if (isProduction && !isHttps) {
+        console.warn('Production clipboard requires HTTPS - using fallback methods');
+        // Skip clipboard API and go directly to fallback
+        throw new Error('HTTPS required for clipboard API in production');
+      }
+
+      // Try the modern clipboard API first
+      await navigator.clipboard.writeText(textToCopy);
+      setCopied(true);
+      toast.success("The link to your interview has been copied to your clipboard.", {
+        position: "bottom-right",
+        duration: 3000,
+      });
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Clipboard error:', error);
+      console.log('Environment:', process.env.NODE_ENV);
+      console.log('Protocol:', window.location.protocol);
+      console.log('User Agent:', navigator.userAgent);
+      
+      // Fallback method using document.execCommand
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
           setCopied(true);
-          toast.success(
-            "The link to your interview has been copied to your clipboard.",
-            {
-              position: "bottom-right",
-              duration: 3000,
-            },
-          );
+          toast.success("The link to your interview has been copied to your clipboard.", {
+            position: "bottom-right",
+            duration: 3000,
+          });
           setTimeout(() => {
             setCopied(false);
           }, 2000);
-        },
-        (err) => {
-          console.log("failed to copy", err.mesage);
-        },
-      );
+        } else {
+          throw new Error('execCommand copy failed');
+        }
+      } catch (fallbackError) {
+        console.error('Fallback clipboard error:', fallbackError);
+        
+        // Production-specific fallback for HTTP environments
+        if (process.env.NODE_ENV === 'production' && window.location.protocol !== 'https:') {
+          toast.error("Copy failed. Please copy the link manually:", {
+            description: textToCopy,
+            duration: 8000,
+          });
+        } else {
+          toast.error("Failed to copy link automatically. Please copy manually:", {
+            description: textToCopy,
+            duration: 5000,
+          });
+        }
+      }
+    }
   };
 
   const handleJumpToInterview = (event: React.MouseEvent) => {
