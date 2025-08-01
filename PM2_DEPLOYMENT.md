@@ -103,6 +103,73 @@ npm run pm2:monit
 - **Script:** `npm start`
 - **Logs:** `./logs/foloup-ats-*.log`
 
+## 🔐 Environment File Management
+
+### **Environment Files Configuration**
+PM2 automatically loads environment variables from the specified `env_file` in the ecosystem config:
+
+- **Next.js App:** `./.env.local`
+- **ATS System:** `./ATS-System/.env.local`
+
+### **Required Environment Variables**
+
+#### **Next.js Application (.env.local)**
+```bash
+# Database Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# AI Service Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+AI_PROVIDER=openai
+
+# Retell Configuration
+RETELL_API_KEY=your_retell_api_key_here
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+```
+
+#### **ATS System (ATS-System/.env.local)**
+```bash
+# Database Configuration
+DATABASE_URL=your_database_url_here
+SUPABASE_URL=your_supabase_url_here
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# AI Service Configuration
+OPENAI_API_KEY=your_openai_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+AI_PROVIDER=openai
+
+# Application Configuration
+PORT=3001
+BASE_URL=http://localhost:3001
+```
+
+### **Environment File Setup**
+```bash
+# Copy example files
+cp env.example .env.local
+cp ATS-System/env.example ATS-System/.env.local
+
+# Edit with your values
+nano .env.local
+nano ATS-System/.env.local
+
+# Verify environment files are loaded
+pm2 env foloup-nextjs
+pm2 env foloup-ats
+```
+
+### **Environment File Security**
+- **Never commit `.env.local` files to version control**
+- **Use different environment files for different environments**
+- **Rotate API keys regularly**
+- **Use strong, unique secrets for each environment**
+
 ## 🔧 Environment Configuration
 
 ### **Production Environment**

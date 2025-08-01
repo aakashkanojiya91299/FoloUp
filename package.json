@@ -24,7 +24,12 @@
     "pm2:delete": "pm2 delete ecosystem.config.js",
     "pm2:logs": "pm2 logs",
     "pm2:status": "pm2 status",
-    "pm2:monit": "pm2 monit"
+    "pm2:monit": "pm2 monit",
+    "pm2:env": "pm2 env",
+    "pm2:env:nextjs": "pm2 env foloup-nextjs",
+    "pm2:env:ats": "pm2 env foloup-ats",
+    "env:setup": "cp env.example .env.local && cp ATS-System/env.example ATS-System/.env.local && echo 'Environment files created. Please edit .env.local and ATS-System/.env.local with your values.'",
+    "env:validate": "node -e \"require('dotenv').config({path: '.env.local'}); console.log('Next.js env loaded:', Object.keys(process.env).filter(k => k.startsWith('NEXT_PUBLIC_') || k.includes('API_KEY') || k.includes('SUPABASE')).length, 'variables')\""
   },
   "dependencies": {
     "@clerk/clerk-js": "^4.65.5",
