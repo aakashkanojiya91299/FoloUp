@@ -15,7 +15,6 @@ const isPublicRoute = createRouteMatcher([
 
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
-  "/interview(.*)",
 ]);
 
 export default clerkMiddleware((auth, req) => {

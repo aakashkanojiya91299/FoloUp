@@ -145,7 +145,7 @@ function InterviewHome({ params, searchParams }: Props) {
         responses.filter((response) => response.call_id !== deletedCallId),
       );
       if (searchParams.call === deletedCallId) {
-        router.push(`/interviews/${params.interviewId}`);
+        router.push(`/dashboard/interviews/${params.interviewId}`);
       }
     }
   };
@@ -176,9 +176,8 @@ function InterviewHome({ params, searchParams }: Props) {
       );
 
       toast.success("Interview status updated", {
-        description: `The interview is now ${
-          updatedIsActive ? "active" : "inactive"
-        }.`,
+        description: `The interview is now ${updatedIsActive ? "active" : "inactive"
+          }.`,
         position: "bottom-right",
         duration: 3000,
       });
@@ -355,7 +354,7 @@ function InterviewHome({ params, searchParams }: Props) {
                     className="bg-transparent shadow-none text-xs text-[#06546e] px-0 h-7 hover:scale-110 relative"
                     onClick={(event) => {
                       router.push(
-                        `/interviews/${params.interviewId}?edit=true`,
+                        `/dashboard/interviews/${params.interviewId}?edit=true`,
                       );
                     }}
                   >
@@ -393,9 +392,8 @@ function InterviewHome({ params, searchParams }: Props) {
                   <span className="ms-3 my-auto text-sm">Active</span>
                   <Switch
                     checked={isActive}
-                    className={`ms-3 my-auto ${
-                      isActive ? "bg-[#06546e]" : "bg-[#E6E7EB]"
-                    }`}
+                    className={`ms-3 my-auto ${isActive ? "bg-[#06546e]" : "bg-[#E6E7EB]"
+                      }`}
                     onCheckedChange={handleToggle}
                   />
                 </>
@@ -453,15 +451,14 @@ function InterviewHome({ params, searchParams }: Props) {
                 {filterResponses().length > 0 ? (
                   filterResponses().map((response) => (
                     <div
-                      className={`p-2 rounded-md hover:bg-[#06546e]/10 border-2 my-1 text-left text-xs ${
-                        searchParams.call == response.call_id
+                      className={`p-2 rounded-md hover:bg-[#06546e]/10 border-2 my-1 text-left text-xs ${searchParams.call == response.call_id
                           ? "bg-[#06546e]/20"
                           : "border-[#06546e]/10"
-                      } flex flex-row justify-between cursor-pointer w-full`}
+                        } flex flex-row justify-between cursor-pointer w-full`}
                       key={response?.id}
                       onClick={() => {
                         router.push(
-                          `/interviews/${params.interviewId}?call=${response.call_id}`,
+                          `/dashboard/interviews/${params.interviewId}?call=${response.call_id}`,
                         );
                         handleResponseClick(response);
                       }}
@@ -498,13 +495,12 @@ function InterviewHome({ params, searchParams }: Props) {
                               </div>
                             )}
                             <div
-                              className={`w-6 h-6 flex items-center justify-center ${
-                                response.is_viewed ? "h-full" : ""
-                              }`}
+                              className={`w-6 h-6 flex items-center justify-center ${response.is_viewed ? "h-full" : ""
+                                }`}
                             >
                               {response.analytics &&
                                 response.analytics.overallScore !==
-                                  undefined && (
+                                undefined && (
                                   <TooltipProvider>
                                     <Tooltip>
                                       <TooltipTrigger asChild>

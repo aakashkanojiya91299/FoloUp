@@ -134,7 +134,7 @@ function EditInterview({ interview }: EditInterviewProps) {
         position: "bottom-right",
         duration: 3000,
       });
-      router.push(`/interviews/${interview?.id}`);
+      router.push(`/dashboard/interviews/${interview?.id}`);
     } catch (error) {
       console.error("Error creating interview:", error);
     }
@@ -171,7 +171,7 @@ function EditInterview({ interview }: EditInterviewProps) {
           <div
             className="mt-2 ml-1 pr-2 inline-flex items-center text-[#06546e] hover:cursor-pointer"
             onClick={() => {
-              router.push(`/interviews/${interview?.id}`);
+              router.push(`/dashboard/interviews/${interview?.id}`);
             }}
           >
             <ArrowLeft className="mr-2" />
